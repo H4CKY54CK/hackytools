@@ -20,5 +20,6 @@ setup(name=PACKAGE_NAME,
       packages=find_packages(exclude=[]),
       python_requires='>=3.6',
       entry_points={'console_scripts':
-        ['whatsmyip = hackytools.utilities:whatsmyip.start',]
+        ['whatsmyip = hackytools.utilities:whatsmyip.start',
+        'spriteit = hackytools.spriteit:main',]
       })
