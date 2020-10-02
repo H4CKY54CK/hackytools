@@ -18,4 +18,7 @@ setup(name=PACKAGE_NAME,
       author='Hackysack',
       author_email='tk13xr37@gmail.com',
       packages=find_packages(exclude=[]),
-      python_requires='>=3.6',)
+      python_requires='>=3.6',
+      entry_points={'console_scripts':
+        ['whatsmyip = hackytools.utilities:whatsmyip.start',]
+      })
