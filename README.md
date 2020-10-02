@@ -8,8 +8,8 @@ You can install this package via the command:
 
 To get the development version instead (where there may be unstable features) use one of the following:
 
-`pip install https://github.com/H4CKY54CK/hackytools/archive/master.zip`
-`pip install https://github.com/H4CKY54CK/hackytools/archive/master.tar.gz`
+`pip install https://github.com/H4CKY54CK/hackytools/archive/main.zip`  
+`pip install https://github.com/H4CKY54CK/hackytools/archive/main.tar.gz`
 
 # What do I get?
 So far, not much. But I promise that I'm working hard at gathering a bunch of my homemade tools.
