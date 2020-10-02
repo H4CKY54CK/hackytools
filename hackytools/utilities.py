@@ -1,6 +1,6 @@
 import requests
 import argparse
-import begins
+import begin
 
 @begin.start
 def whatsmyip():
