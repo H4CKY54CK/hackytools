@@ -5,6 +5,7 @@ import argparse
 from math import sqrt, ceil, floor
 from PIL import Image
 from threading import Thread
+from warnings import warn
 
 class Sprite:
 
@@ -108,13 +109,16 @@ def main(argv=None):
 
     argv = (argv or sys.argv)[1:]
     parser = argparse.ArgumentParser()
-    parser.add_argument('source', nargs='?')
+    parser.add_argument('source')
     parser.add_argument('output', nargs='?', default='sprites')
-    parser.add_argument('-x', '--width', dest='width', type=int, const=None)
-    parser.add_argument('-y', '--height', dest='height', type=int, const=None)
+    parser.add_argument('-x', '--width', dest='width', type=int, default=None)
+    parser.add_argument('-y', '--height', dest='height', type=int, default=None)
+    parser.add_argument('-xy', '--size', dest='size', type=int, default=None)
     # parser.add_argument('-V', '--version', action='store_true')
     parser.set_defaults(func=start)
     args = parser.parse_args(argv)
+    if not args.width and not args.height and args.size:
+        args.width = args.height = args.size
     args.func(args)
 
 if __name__ == '__main__':
