@@ -5,7 +5,6 @@ import argparse
 from math import sqrt, ceil, floor
 from PIL import Image
 from threading import Thread
-from warnings import warn
 
 class Sprite:
 
