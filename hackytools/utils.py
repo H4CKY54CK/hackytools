@@ -1,6 +1,8 @@
 import requests
 
-def whatsmyip():
+def whatsmyip(arg1=None):
+    if arg1:
+        print(arg1)
     return requests.get('https://api.ipify.org').text
 
 def icanhazip():
