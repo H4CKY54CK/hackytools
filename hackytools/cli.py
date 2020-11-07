@@ -11,25 +11,27 @@ def hackystats(args):
 
     x = os.cpu_count()
 
-    print(f"\x1b[4mCPU Freqs ({x}) (current/max)\x1b[0m")
+    result = ''
+
+    result += f"\x1b[4mCPU Freqs ({x}) (current/max)\x1b[0m\n"
     for i in range(x):
         with open(cpu_cur(i)) as f:
             freq = int(f.read().strip())
         with open(cpu_max(i)) as f:
             max_freq = int(f.read().strip())
         if freq > 1000000:
-            print(f"  CPU{i}: {max_freq/1000000:,.2f} GHz (\x1b[1m{freq/1000000:,.2f} GHz\x1b[0m)")
+            result += f"  CPU{i}: {max_freq/1000000:,.2f} GHz (\x1b[1m{freq/1000000:,.2f} GHz\x1b[0m)\n"
         else:
-            print(f"  CPU{i}: {max_freq/1000:,.1f} MHz (\x1b[1m{freq/1000:,.1f} MHz\x1b[0m)")
+            result += f"  CPU{i}: {max_freq/1000:,.1f} MHz (\x1b[1m{freq/1000:,.1f} MHz\x1b[0m)\n"
 
-    print(f"\x1b[4mTemperature\x1b[0m")
+    result += f"\x1b[4mTemperature\x1b[0m\n"
     with open(temps) as f:
         t = int(f.read().strip())
     if args.fahrenheit:
-        msg = f"  {t / 1000 * 9 / 5 + 32:.1f} \N{DEGREE SIGN}F"
+        result += f"  {t / 1000 * 9 / 5 + 32:.1f} \N{DEGREE SIGN}F\n"
     else:
-        msg = f"  {t / 1000:.1f} \N{DEGREE SIGN}C"
-    print(msg)
+        result += f"  {t / 1000:.1f} \N{DEGREE SIGN}C\n"
+    return result
 
 def main(argv=None):
     argv = (argv or sys.argv)[1:]
@@ -37,7 +39,7 @@ def main(argv=None):
     parser.add_argument('--fahrenheit', '-f', action='store_true', help="show temperature in fahrenheit instead of celsius")
     parser.set_defaults(func=hackystats)
     args = parser.parse_args(argv)
-    args.func(args)
+    return args.func(args)
 
 if __name__ == '__main__':
     sys.exit(main())
