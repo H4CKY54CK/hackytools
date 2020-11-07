@@ -18,9 +18,9 @@ def hackystats(args):
         with open(cpu_max(i)) as f:
             max_freq = int(f.read().strip())
         if freq > 1000000:
-            print(f"  CPU{i}: \x1b[1m{freq/1000000:,.2f}\x1b[0m / {max_freq/1000000:,.2f} GHz")
+            print(f"  CPU{i}: {freq/1000000:,.2f} GHz (\x1b[1m{max_freq/1000000:,.2f} GHz\x1b[0m)")
         else:
-            print(f"  CPU{i}: \x1b[1m{freq/1000:,.1f}\x1b[0m / {max_freq/1000:,.1f} MHz")
+            print(f"  CPU{i}: {freq/1000:,.1f} MHz (\x1b[1m{max_freq/1000:,.1f} MHz\x1b[0m)")
 
     print(f"\x1b[4mTemperature\x1b[0m")
     with open(temps) as f:
