@@ -18,12 +18,12 @@ setup(name=PACKAGE_NAME,
       author='Hackysack',
       author_email='tk13xr37@gmail.com',
       packages=find_packages(exclude=[]),
-      install_requires=['begins', 'pillow'],
+      # install_requires=['pillow'],
       python_requires='>=3.6',
       entry_points={'console_scripts':
         [
+            'hacky = hackytools.cli:main',
             # 'whatsmyip = hackytools.utilities:whatsmyip.start',
             # 'spriteit = hackytools.spriteit:main',
-            'hacky = hackytools.cli:main',
         ]
       })

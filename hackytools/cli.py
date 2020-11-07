@@ -20,14 +20,14 @@ def hackystats(args):
         t = int(f.read().strip()) / 1000
     sys.stdout.write(f"  {t:.1f} \u00b0C | {t*9/5+32:.0f} \u00b0F\n")
 
-
 def main(argv=None):
     argv = (argv or sys.argv)[1:]
     parser = argparse.ArgumentParser()
     parser.set_defaults(func=hackystats)
     args = parser.parse_args(argv)
+    if os.name == 'nt':
+        sys.exit("This command only works on linux.")
     args.func(args)
-
 
 if __name__ == '__main__':
     sys.exit(main())

@@ -1,4 +1,4 @@
 __version__ = "0.0.6"
 
-from .timer import *
-from .utilities import *
+from .timing import *
+from .utils import *

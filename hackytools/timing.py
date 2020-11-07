@@ -5,13 +5,16 @@ sprint = sys.stdout.write
 
 def ftime(ns):
     if ns < 1000:
-        return f"{ns:.2f} ns"
+        return f"{ns} ns"
     elif ns < 1000000:
         return f"{ns/1000:.2f} \u00B5s"
     elif ns < 1000000000:
         return f"{ns/1000000:.2f} ms"
     else:
         return f"{ns/1000000000:.2f} s"
+
+def ftime_ns(ns):
+    return ftime(ns)
 
 def timeit(arg=None, repeat=1):
     def decorator(func):
