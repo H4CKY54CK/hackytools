@@ -10,7 +10,7 @@ def hackystats(args):
     for i in range(os.cpu_count()):
         with open(f"/sys/devices/system/cpu/cpu{i}/cpufreq/scaling_cur_freq") as f:
             freq = int(f.read().strip())
-        if freq > 1000000:
+        if freq >= 1000000:
             sys.stdout.write(f"  CPU {i}: {freq/1000000:.2f} GHz\n")
         else:
             sys.stdout.write(f"  CPU {i}: {freq/1000:.2f} GHz\n")
