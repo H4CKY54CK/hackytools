@@ -23,7 +23,8 @@ setup(name=PACKAGE_NAME,
       entry_points={'console_scripts':
         [
             'hacky = hackytools.cli:main',
-            # 'whatsmyip = hackytools.utilities:whatsmyip.start',
-            # 'spriteit = hackytools.spriteit:main',
+            'whatsmyip = hackytools.utils:whatsmyip',
+            'icanhazip = hackytools.utils:icanhazip',
+            'spriteit = hackytools.spriteit:main',
         ]
       })
