@@ -18,7 +18,7 @@ def hackystats(args):
     sys.stdout.write("\x1b[1mTemperature\x1b[0m:\n")
     with open("/sys/class/thermal/thermal_zone0/temp") as f:
         t = int(f.read().strip()) / 1000
-    sys.stdout.write(f"  {t:.1f} \u00b0C | {t*9/5+32:.0f} \u00b0F\n")
+    sys.stdout.write(f"  {t:.1f} \u00b0C | {t*9/5+32:.1f} \u00b0F\n")
 
 def main(argv=None):
     argv = (argv or sys.argv)[1:]
