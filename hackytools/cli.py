@@ -5,7 +5,7 @@ import platform
 
 def hackystats(args):
 
-    sys.stdout.write(f"\x1b[1m\x1b[4m{platform.platform()}\x1b[0m\n\n")
+    sys.stdout.write(f"\x1b[1m{platform.platform()}\x1b[0m\n\n")
     sys.stdout.write(f"\x1b[4mCPU Freqs (0-{os.cpu_count() - 1}):\x1b[0m\n")
     for i in range(os.cpu_count()):
         with open(f"/sys/devices/system/cpu/cpu{i}/cpufreq/scaling_cur_freq") as f:
