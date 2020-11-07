@@ -6,18 +6,23 @@ sprint = sys.stdout.write
 
 
 def hackystats_g(args):
+    path = "/sys/devices/system/cpu/cpu{}/cpufreq/{}"
     data = {
-        'freqs': [f"/sys/devices/system/cpu/cpu{i}/cpufreq/scaling_cur_freq" for i in range(os.cpu_count())],
+        'freqs': [(path.format(i, 'scaling_cur_freq'), path.format(i, 'scaling_max_freq')) for i in range(os.cpu_count())],
         'temp': "/sys/class/thermal/thermal_zone0/temp",
     }
 
+    underline = lambda x: f"\x1b[4m{x}\x1b[0m"
+    bold = lambda x: f"\x1b[1m{x}\x1b[0m"
+
     for key in data:
         if key == 'freqs':
-            sprint(f"\x1b[1mCPU Freqs ({len(data[key])} cores)\x1b[0m\n")
             for item in data[key]:
-                with open(item) as f:
-                    freq = int(f.read().strip())
-                sprint(f"  {freq/1000:.0f} MHz (core {data[key].index(item)})\n")
+                with open(item[0]) as f:
+                    freq = f"{int(f.read().strip()) / 1000:.0f}"
+                with open(item[1]) as f:
+                    max_freq = f"{int(f.read().strip()) / 1000:.0f}"
+                sprint(f"CPU{data[key].index(item)} Freq: {bold(freq)} MHz (max: {max_freq})\n")
         if key == 'temp':
             with open(data[key]) as f:
                 t = int(f.read().strip())
