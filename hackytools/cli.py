@@ -13,7 +13,7 @@ def hackystats(args):
         if freq >= 1000000:
             sys.stdout.write(f"  CPU {i}: {freq/1000000:.2f} GHz\n")
         else:
-            sys.stdout.write(f"  CPU {i}: {freq/1000:.2f} GHz\n")
+            sys.stdout.write(f"  CPU {i}: {freq/1000:.0f} MHz\n")
 
     sys.stdout.write("\x1b[1mTemperature\x1b[0m:\n")
     with open("/sys/class/thermal/thermal_zone0/temp") as f:
