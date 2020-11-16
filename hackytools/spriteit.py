@@ -91,7 +91,7 @@ class Sprite:
         for item in images:
             if os.path.isdir(item):
                 continue
-            line = f".flair-{folder}{item.name.replace('.png', '').replace('_4', '')} {{min-width: {size[0]}px; background-position: {'-' if x != 0 else ''}{x}{'px' if x != 0 else ''} {'-' if y != 0 else ''}{y}{'px' if y != 0 else ''};}}\n"
+            line = f".flair-{folder}{item.name.replace('.png', '').replace('_4', '')} {{background-position: {'-' if x != 0 else ''}{x}{'px' if x != 0 else ''} {'-' if y != 0 else ''}{y}{'px' if y != 0 else ''};}}\n"
             x += size[0]
             if x >= size[0] * rows:
                 x = 0
