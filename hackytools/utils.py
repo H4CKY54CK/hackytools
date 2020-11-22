@@ -15,7 +15,7 @@ def icanhazip():
 
 def ftime(ns):
     if ns < 1000:
-        return f"{ns} ns"
+        return f"{ns:.2f} ns"
     elif ns < 1000000:
         return f"{ns/1000:.2f} \u00B5s"
     elif ns < 1000000000:
