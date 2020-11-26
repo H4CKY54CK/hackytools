@@ -3,6 +3,8 @@ import sys
 import requests
 import socket
 import time
+import shutil
+
 
 def whatsmyip():
     if len(sys.argv) > 1:
@@ -32,7 +34,7 @@ def elapsed(func):
         ts = time.perf_counter_ns()
         result = func(*args, **kwargs)
         te = time.perf_counter_ns() - ts
-        sys.stdout.write(f"{func.__qualname__} elapsed: {ftime(te)}\n")
+        sys.stdout.write(f"{func.__qualname__!r} elapsed: {ftime(te)}\n")
         return result
     return wrapper
 
@@ -47,7 +49,7 @@ def bestof(argument=None, freq=7):
                 te = time.perf_counter_ns() - ts
                 times.append(te)
             avg, best, worst = sum(times)/len(times), min(times), max(times)
-            sys.stdout.write(f"{func.__qualname__} elapsed (best of {freq}): avg: {ftime(avg)} | best: {ftime(best)} | worst: {ftime(worst)}\n")
+            sys.stdout.write(f"{func.__qualname__!r} elapsed (best of {freq}): avg: {ftime(avg)} | best: {ftime(best)} | worst: {ftime(worst)}\n")
             return result
         return wrapper
     if callable(argument):
@@ -55,3 +57,12 @@ def bestof(argument=None, freq=7):
     elif isinstance(argument, int):
         freq = argument
     return decorator
+
+def sprint(text):
+    return sys.stdout.write(str(text))
+
+def spout(text, pos=None):
+    if pos:
+        x,y = pos
+        return sys.stdout.write(f"\x1b[s\x1b[{x};{y}H{text}\x1b[u")
+    return sys.stdout.write(f"{text}")
