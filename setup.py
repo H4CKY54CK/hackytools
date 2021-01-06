@@ -12,17 +12,19 @@ with open('README.md') as f:
 
 setup(name=PACKAGE_NAME,
       version=VERSION,
+      url="https://github.com/H4CKY54CK/hackytools",
+      license="MIT License",
       description="Tools that are hacky. Obviously.",
       long_description=README,
       long_description_content_type="text/markdown",
       author='Hackysack',
       author_email='tk13xr37@gmail.com',
       packages=find_packages(exclude=[]),
-      # install_requires=['pillow'],
+      install_requires=['regex'],
       python_requires='>=3.6',
       entry_points={'console_scripts':
         [
-            'bork = hackytools.cli:main',
+            'bork = hackytools.bork:main',
             'whatsmyip = hackytools.utils:whatsmyip',
             'icanhazip = hackytools.utils:icanhazip',
             'spriteit = hackytools.spriteit:main',

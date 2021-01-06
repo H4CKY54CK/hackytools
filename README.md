@@ -6,11 +6,6 @@ You can install this package via the command:
 
 `pip install hackytools`
 
-To get the development version instead (where there may be unstable features) use one of the following:
-
-`pip install https://github.com/H4CKY54CK/hackytools/archive/main.zip`  
-`pip install https://github.com/H4CKY54CK/hackytools/archive/main.tar.gz`
-
 # What do I get?
 So far, not much. But I promise that I'm working hard at gathering a bunch of my homemade tools.
 
@@ -18,94 +13,64 @@ For right now, you get a couple of different hacky decorators, a spritesheet/sty
 
 # Decorators
 
-## `@timeit`
+## `@elapsed` / `@bestof`
 
-A decorator to time how long a function takes, illustrated below.
+Two decorators made for quickly timing a function. `@elapsed` only times the function once, and `@bestof` defaults to best of 7, but you can specify any number. Here's an example of how to use them.
 
-    from hackytools import timeit
+    from hackytools import elapsed, bestof
     import time
 
-    # We need the `time` module to delay our test functions just a little bit.
-
-    # Time how long a function takes.
-    @timeit
-    def main1():
-        time.sleep(2)
-
-    # Same thing, but in case you're used to using parentheses
-    @timeit()
-    def main2():
+    @elapsed
+    def fun1():
         time.sleep(.5)
+        return
 
-    # Get an average elapsed time by running your function 5 times.
-    @timeit(repeat=5)
-    def main3():
-        pass
+    @bestof
+    def fun2():
+        time.sleep(.25)
+        return
 
-    if __name__ == '__main__':
-        main1()
-        main2()
-        main3()
+    fun1()
+    fun2()
 
-
-    # main1 elapsed: 2.00 s
-    # main2 elapsed: 500.38 ms
-    # main3 average elapsed: 616.67 ns | best (of 5): 300.00 ns | worst (of 5): 1.90 µs
+    # Output
+    # 'fun1' elapsed: 500.53 ms
+    # 'fun2' elapsed (best of 7): avg: 250.35 ms | best: 250.28 ms | worst: 250.63 ms
 
 The timing decorator also automatically converts the time returned into a sensible unit, for optimal viewing pleasure.
 
-Just be careful that you don't repeat 50 times, and your code takes 50 seconds each run. That would take forever. Be smart.
-
-## `@timeable`
-
-This does *nearly* the same thing as `@timeit`. However, `@timeable` by default, does **not** time your function. In fact, it doesn't interfere with it at all, unless explicitly told to do so. What do I mean? I'll explain.
-
-    from hackytools import timeable
-
-    @timeable
-    def some_function():
-        # do some stuff
-        return # or whatever
-
-    some_function()
-
-    # Even though it is decorated, this function will act normally. However...
-    # If we were to pass in a specific (unlikely to already be in use) kwargs
-    # dict such as the following (and unpack it with **):
-
-    some_function(**{'_frequency': 1})
-
-    # some_function elapsed: 1.20 µs
-
-    # This WILL time the function, with a frequency of 1 time(s).
-
-    # "But that function doesn't take any arguments!", I hear you say.
-
-    # And you'd be right. Through the magic of decorators (and some pretty basic python)
-    # we can actually reach into the kwargs, get the value for this specific kwarg,
-    # and then remove the kwargs from the kwargs dict. ezpz
-
-## `@logme`
-
-This is just a regular logging decorator. You decorate your function with `@logme`, and it logs some basic information about what just happened, to the file `{your_filename}.log`. So, if your filename was `myproject.py`, the logfile would literally be `myproject.py.log`. This is for several reasons, the most important being to not overwrite existing files. I should probably just add a file check.
-
-    # myproject.py
-
-    from hackytools import logme
-
-    @logme
-    def add(x, y):
-        return x + y
-
-    add(5, 6)
-
-    # What was logged and where:
-    # (DEBUG) 10/09/20 01:54:33 PM: func: add | args: (5, 6) | kwargs: {} | returned: 11
-    # to file `myproject.py.log`
+# Command Line Commands
 
 ## `whatsmyip`
 
-Use this at the command line to get your **public** IP address. This is just a convenience command due to me getting tired of having to specifically search "whats my ip ipv4" on Google. If I'm going to do *some* of the legwork, I may as well make it easy on myself.
+Use this at the command line to get your **public** IP address. This is just a convenience command due to me getting tired of having to specifically search "whats my ip ipv4" on Google. If I'm going to do *some* of the legwork, I may as well make it easy on myself. You can also get your **local** IP. Simply use it like:
+
+(Example of bash prompt)
+
+    $ whatsmyip
+    $ 123.45.67.89
+
+    $ whatsmyip local
+    $ 192.168.0.69
+
+
+(Example of cmd prompt)
+
+    C:\Users\user\Desktop>whatsmyip
+    $ 123.45.67.89
+
+    C:\Users\user\Desktop>whatsmyip local
+    $ 192.168.0.69
+
+# Spritesheet/stylesheet Generation Tool
+
+## `spriteit`
+
+(Detailed how-to coming soon. Sorry.)
+
+# Misc.
+
+You also get a variety of functions to aid you in your hacky coding adventure. (Detailed documentation coming soon. Sorry!)
 
 # More
 
