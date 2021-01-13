@@ -5,7 +5,8 @@ import argparse
 
 
 def gifit(args=None, directory=None):
-    # if directory is None:  Add back in if needed, as of right now there is no purpose.
+    # Add back in if needed, as of right now there is no purpose.
+    # if directory is None:
     #    source = args.source
     if not args.output.endswith('.gif'):
         output = f"{args.output.rstrip('.gif')}.gif"

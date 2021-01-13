@@ -2,7 +2,7 @@ import argparse
 import sys
 from .bork import bork
 from .utils import whatsmyip
-from .spriteit import spriteit  # Spriteit is a method, not currently a function cannot be imported in this way.
+from .spriteit import spriteit
 from .gifit import gifit
 from .network_monitor import testwork
 import os
@@ -10,8 +10,11 @@ import os
 
 def main(argv=None):
     argv = (argv or sys.argv)
-    argv[0] = os.path.splitext(os.path.basename(argv[0]))[0]  # Grab script name and location.
-    parser = argparse.ArgumentParser(prog=argv[0])  # Create ArgumentParser
+    # Grab script name and location.
+    argv[0] = os.path.splitext(os.path.basename(argv[0]))[0]
+
+    # Create ArgumentParser
+    parser = argparse.ArgumentParser(prog=argv[0])
     subparsers = parser.add_subparsers()
 
     # Init the different SubParsers for the Command Line Tool.

@@ -45,7 +45,8 @@ class Sprite:
         for thread in threads:
             thread.join()
 
-    @staticmethod  # Static method, the method doesn't call self. no need for it to be a self method
+    # Static method, the method doesn't call self. no need for it to be a self method
+    @staticmethod
     def single_sheet(source, width, height, output):
 
         images = [file.path for file in os.scandir(source)]
@@ -73,7 +74,8 @@ class Sprite:
         sheet.save(filename, 'PNG')
         print("{} generated.".format(filename.replace('.png', '')))
 
-    @staticmethod  # Static method, the method doesn't call self. no need for it to be a self method
+    # Static method, the method doesn't call self. no need for it to be a self method
+    @staticmethod
     def generate_stylesheet(source, width, height, output, project=None):
 
         images = [file for file in os.scandir(source)]
