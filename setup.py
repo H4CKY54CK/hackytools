@@ -1,11 +1,12 @@
 import re
 from setuptools import find_packages, setup
-from codecs import open
-from os import path
-HERE = path.abspath(path.dirname(__file__))
+import os
+
+HERE = os.path.abspath(os.path.dirname(__file__))
 PACKAGE_NAME = 'hackytools'
-with open(path.join(HERE, PACKAGE_NAME, "__init__.py"), encoding="utf-8") as fp:
-    VERSION = re.search('__version__ = "([^"]+)"', fp.read()).group(1)
+
+with open(os.path.join(HERE, PACKAGE_NAME, "__init__.py"), encoding="utf-8") as fp:
+    VERSION = re.search(r'''_*version_* *= *['|"](\d+(\.\d/*)*\w*)['|"]''', fp.read()).group(1)
 
 with open('README.md') as f:
     README = f.read()
@@ -20,13 +21,14 @@ setup(name=PACKAGE_NAME,
       author='Hackysack',
       author_email='tk13xr37@gmail.com',
       packages=find_packages(exclude=[]),
-      install_requires=['regex'],
+      install_requires=['speedtest-cli', 'pillow<=8.0.1'],
       python_requires='>=3.6',
       entry_points={'console_scripts':
         [
-            'bork = hackytools.bork:main',
-            'whatsmyip = hackytools.utils:whatsmyip',
-            'icanhazip = hackytools.utils:icanhazip',
-            'spriteit = hackytools.spriteit:main',
+            'bork = hackytools.cli:main',
+            'whatsmyip = hackytools.cli:main',
+            'whatsmyspeed = hackytools.cli:main',
+            'spriteit = hackytools.cli:main',
+            'gifit = hackytools.cli:main',
         ]
       })

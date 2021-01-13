@@ -5,7 +5,6 @@ import socket
 import time
 import shutil
 import os
-import begin
 from glob import glob
 from urllib.request import urlopen
 
@@ -75,10 +74,9 @@ def flatten(data):
 def sprint(text):
     return sys.stdout.write(str(text))
 
-def whatsmyip():
-    if len(sys.argv) > 1:
-        if sys.argv[1].lower() in ['local', '-local', '--local']:
-            return socket.gethostbyname(socket.gethostname())
+def whatsmyip(args):
+    if args.local:
+        return socket.gethostbyname(socket.gethostname())
     return requests.get('https://api.ipify.org').text.strip()
 
 # Needs testing

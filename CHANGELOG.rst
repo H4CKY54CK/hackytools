@@ -4,6 +4,23 @@ Change Log
 Unreleased
 ----------
 
+0.2.0 (2021/1/8)
+-----------------
+
+**Special Notes**
+
+Due to an accidental overwrite, we're now 0.0.1 version behind. Due to this, we shall increment a minor version (0.1.0), in case there are breaking changes.
+
+**Added**
+
+* Network monitor that can store results in a SQLite3 database file, with many other options. Will be added to the documentation soon.
+* Added missing meta-data to package info for PyPi.
+
+**Changed**
+
+* Overhaulled the entire CLI system, allowing for a cleaner parsing system. The actual commands haven't changed, but the underlying parser has. This will allow for better organization of the different parts of the parser.
+* Changed the extension of `LICENSE` to make it easier for anyone to open and view the contents.
+
 0.1.2 (2020/12/29)
 -----------------
 

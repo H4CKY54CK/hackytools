@@ -4,7 +4,7 @@ import shutil
 import platform
 import argparse
 import subprocess
-import regex as re
+import re
 
 
 def details():
@@ -32,51 +32,33 @@ def temperature():
         sys.stdout.write(f"\x1b[4mTemperature\x1b[0m\n  {data:.1f}\u00b0C | {data * 9 / 5 + 32:.1f}\u00b0F\n")
 
     # Specific to my device only.
-    else:
-        process = subprocess.run('sensors nvme-pci-0100 amdgpu-pci-0400', capture_output=True, shell=True)
-        return_code = process.returncode
+    # else:
+    #     process = subprocess.run('sensors nvme-pci-0100 amdgpu-pci-0400', capture_output=True, shell=True)
+    #     return_code = process.returncode
 
-        if process.returncode != 0:
-            return
+    #     if process.returncode != 0:
+    #         return
 
-        output = process.stdout.decode()
+    #     output = process.stdout.decode()
         
-        cpu_pattern = re.compile(r'(?<=Composite: +\+)\d+\.\d+')
-        gpu_pattern = re.compile(r'(?<=edge: +\+)\d+\.\d+')
+    #     cpu_pattern = re.compile(r'(Composite: *\+)(\d+(\.\d*))')
+    #     gpu_pattern = re.compile(r'(edge: *\+)(\d+(\.\d*))')
 
 
-        ctc = float(cpu_pattern.search(output).group())
-        gtc = float(gpu_pattern.search(output).group())
-        ctf = ctc * 9 / 5 + 32
-        gtf = gtc * 9 / 5 + 32
+    #     ctc = float(cpu_pattern.search(output).group(2))
+    #     gtc = float(gpu_pattern.search(output).group(2))
+    #     ctf = ctc * 9 / 5 + 32
+    #     gtf = gtc * 9 / 5 + 32
 
-        cpu_temp = f"{ctc:.1f}\u00b0C | {ctf:.1f}\u00b0F"
-        gpu_temp = f"{gtc:.1f}\u00b0C | {gtf:.1f}\u00b0F"
-
-
-        sys.stdout.write(f"\x1b[4mCPU Temp\x1b[0m\n  {cpu_temp}\n\x1b[4mGPU Temp\x1b[0m\n  {gpu_temp}\n")
+    #     cpu_temp = f"{ctc:.1f}\u00b0C | {ctf:.1f}\u00b0F"
+    #     gpu_temp = f"{gtc:.1f}\u00b0C | {gtf:.1f}\u00b0F"
 
 
-def hackystats(args):
+    #     sys.stdout.write(f"\x1b[4mCPU Temp\x1b[0m\n  {cpu_temp}\n\x1b[4mGPU Temp\x1b[0m\n  {gpu_temp}\n")
+
+
+def bork(args):
 
     details()
     frequency()
     temperature()
-
-
-def main(argv=None):
-    argv = (argv or sys.argv)[1:]
-    parser = argparse.ArgumentParser()
-    parser.set_defaults(func=hackystats)
-    args = parser.parse_args(argv)
-    if os.name == 'nt':
-        return "This command only works on linux."
-
-    try:
-        args.func(args)
-    except KeyboardInterrupt:
-        sys.stdout.write("Action cancelled by user.\n")
-
-
-if __name__ == '__main__':
-    sys.exit(main())

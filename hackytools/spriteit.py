@@ -42,6 +42,7 @@ class Sprite:
             thread.start()
         for thread in threads:
             thread.join()
+        print(f"{self.stylesheet_file} generated")
 
     def single_sheet(self, source, width, height, output):
         
@@ -68,7 +69,7 @@ class Sprite:
             # os.mkdir(output)
         filename = os.path.join(output, 'flairs-{}.png'.format(os.path.split(source)[1]))
         sheet.save(filename,'PNG')
-        print("{} generated.".format(filename.replace('.png', '')))
+        print(f"{filename} generated.")
     
     def generate_stylesheet(self, source, width, height, output, project=None):
 
@@ -99,26 +100,12 @@ class Sprite:
             lines.append(line)
         with open(stylesheet, 'a') as f:
             f.writelines(lines)
+        self.stylesheet_file = stylesheet
 
-def start(args):
+def spriteit(args):
+
+    if not args.width and not args.height and args.size:
+        args.width = args.height = args.size
 
     Sprite(args).spriteit()
 
-def main(argv=None):
-
-    argv = (argv or sys.argv)[1:]
-    parser = argparse.ArgumentParser()
-    parser.add_argument('source')
-    parser.add_argument('output', nargs='?', default='sprites')
-    parser.add_argument('-x', '--width', dest='width', type=int, default=None)
-    parser.add_argument('-y', '--height', dest='height', type=int, default=None)
-    parser.add_argument('-xy', '--size', dest='size', type=int, default=None)
-    # parser.add_argument('-V', '--version', action='store_true')
-    parser.set_defaults(func=start)
-    args = parser.parse_args(argv)
-    if not args.width and not args.height and args.size:
-        args.width = args.height = args.size
-    args.func(args)
-
-if __name__ == '__main__':
-    sys.exit(main())
