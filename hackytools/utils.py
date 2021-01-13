@@ -5,6 +5,7 @@ import socket
 import time
 import shutil
 import os
+import begin
 from glob import glob
 from urllib.request import urlopen
 
@@ -22,21 +23,25 @@ def hackywalk(source):
                 results.append(item.path)
     return results
 
+
 def icanhazip():
     return requests.get('https://ipv4.icanhazip.com').text.strip()
+
 
 def ftime(ns):
     if ns < 1000:
         return f"{ns:.2f} ns"
     elif ns < 1000000:
-        return f"{ns/1000:.2f} \u00B5s"
+        return f"{ns / 1000:.2f} \u00B5s"
     elif ns < 1000000000:
-        return f"{ns/1000000:.2f} ms"
+        return f"{ns / 1000000:.2f} ms"
     else:
-        return f"{ns/1000000000:.2f} s"
+        return f"{ns / 1000000000:.2f} s"
+
 
 def ftime_ns(ns):
     return ftime(ns)
+
 
 def elapsed(func):
     @wraps(func)
@@ -46,7 +51,9 @@ def elapsed(func):
         te = time.perf_counter_ns() - ts
         sys.stdout.write(f"{func.__qualname__!r} elapsed: {ftime(te)}\n")
         return result
+
     return wrapper
+
 
 def bestof(argument=None, freq=7):
     def decorator(func):
@@ -58,25 +65,32 @@ def bestof(argument=None, freq=7):
                 result = func(*args, **kwargs)
                 te = time.perf_counter_ns() - ts
                 times.append(te)
-            avg, best, worst = sum(times)/len(times), min(times), max(times)
-            sys.stdout.write(f"{func.__qualname__!r} elapsed (best of {freq}): avg: {ftime(avg)} | best: {ftime(best)} | worst: {ftime(worst)}\n")
+            avg, best, worst = sum(times) / len(times), min(times), max(times)
+            sys.stdout.write(
+                f"{func.__qualname__!r} elapsed (best of {freq}): avg: {ftime(avg)} | best: {ftime(best)} | worst: {ftime(worst)}\n")
             return result
+
         return wrapper
+
     if callable(argument):
         return decorator(argument)
     elif isinstance(argument, int):
         freq = argument
     return decorator
 
+
 def flatten(data):
     return sum(([x] if not isinstance(x, list) else flatten(x) for x in data), [])
+
 
 def sprint(text):
     return sys.stdout.write(str(text))
 
-def whatsmyip(args):
-    if args.local:
-        return socket.gethostbyname(socket.gethostname())
+
+def whatsmyip():
+    if len(sys.argv) > 1:
+        if sys.argv[1].lower() in ['local', '-local', '--local']:
+            return socket.gethostbyname(socket.gethostname())
     return requests.get('https://api.ipify.org').text.strip()
 
 # Needs testing
@@ -95,7 +109,7 @@ def whatsmyip(args):
 
 # @begin.start
 # def wcit(*filenames):
-    
+
 #     files = [f for g in filenames for f in glob(g)]
 #     chars = 0
 #     words = 0

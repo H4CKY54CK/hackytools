@@ -1,0 +1,5 @@
+setuptools>=51.1.2
+regex>=2020.11.13
+Pillow>=8.1.0
+requests>=2.25.1
+begin>=0.1.0
