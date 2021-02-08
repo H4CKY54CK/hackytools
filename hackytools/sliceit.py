@@ -4,8 +4,8 @@ import argparse
 import math
 from PIL import Image
 
-
 def sliceit(args):
+
     startup = [args.source]
     images = []
     while startup:
@@ -44,12 +44,11 @@ def sliceit(args):
         if yy > height:
             print(f"Sliced out a total of {total} images!")
             sys.exit()
-        box = (x, y, xx, yy)
+        box = (x,y,xx,yy)
         img.crop(box).save(output)
         x += args.width
         xx += args.width
         z += 1
-
 
 def main(argv=None):
     argv = (argv or sys.argv)[1:]
@@ -63,13 +62,13 @@ def main(argv=None):
     parser.set_defaults(func=sliceit)
     args, options = parser.parse_known_args(argv)
     if not args.width and not args.height and options and not args.rows and not args.columns:
+
         args.width = int(options[0])
         args.height = int(options[1])
     if not isinstance(args.height, int) and not isinstance(args.width, int) and not args.rows and not args.columns:
         parser.error('error')
 
     args.func(args)
-
 
 if __name__ == '__main__':
     sys.exit(main())

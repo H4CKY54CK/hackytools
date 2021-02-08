@@ -44,6 +44,7 @@ class Sprite:
             thread.start()
         for thread in threads:
             thread.join()
+        print(f"{self.stylesheet_file} generated")
 
     # Static method, the method doesn't call self. no need for it to be a self method
     @staticmethod
@@ -105,7 +106,7 @@ class Sprite:
             lines.append(line)
         with open(stylesheet, 'a') as f:
             f.writelines(lines)
-
+        self.stylesheet_file = stylesheet
 
 def start(args):
     Sprite(args).spriteit()
@@ -124,8 +125,6 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if not args.width and not args.height and args.size:
         args.width = args.height = args.size
-    args.func(args)
-
 
 if __name__ == '__main__':
     sys.exit(main())
