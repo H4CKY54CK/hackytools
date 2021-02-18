@@ -45,7 +45,7 @@ class Sprite:
         print(f"{self.stylesheet_file} generated")
 
     def single_sheet(self, source, width, height, output):
-        
+
         images = [file.path for file in os.scandir(source)]
         if len(images) > ceil(sqrt(len(images))) * floor(sqrt(len(images))):
             rows, cols = ceil(sqrt(len(images))), ceil(sqrt(len(images)))
@@ -70,7 +70,7 @@ class Sprite:
         filename = os.path.join(output, 'flairs-{}.png'.format(os.path.split(source)[1]))
         sheet.save(filename,'PNG')
         print(f"{filename} generated.")
-    
+
     def generate_stylesheet(self, source, width, height, output, project=None):
 
         images = [file for file in os.scandir(source)]

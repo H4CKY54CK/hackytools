@@ -10,10 +10,14 @@ import os
 
 def main(argv=None):
     argv = (argv or sys.argv)
+    # Grab script name and location.
     argv[0] = os.path.splitext(os.path.basename(argv[0]))[0]
+
+    # Create ArgumentParser
     parser = argparse.ArgumentParser(prog=argv[0])
     subparsers = parser.add_subparsers()
 
+    # Init the different SubParsers for the Command Line Tool.
     bork_parser = subparsers.add_parser('bork')
     bork_parser.set_defaults(func=bork)
 
@@ -40,7 +44,6 @@ def main(argv=None):
     testwork_parser.add_argument('--last', default=0, type=int, help="output the last N results")
     testwork_parser.add_argument('--debug', action='store_true')
     testwork_parser.set_defaults(func=testwork)
-
 
     args = parser.parse_args(argv)
     return args.func(args)
