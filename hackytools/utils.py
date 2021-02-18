@@ -95,7 +95,7 @@ def whatsmyip(args):
 
 # @begin.start
 # def wcit(*filenames):
-    
+
 #     files = [f for g in filenames for f in glob(g)]
 #     chars = 0
 #     words = 0
