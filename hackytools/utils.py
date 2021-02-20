@@ -14,7 +14,7 @@ def ftime(seconds):
     h, m = divmod(m, 60)
     d, h = divmod(h, 24)
     data = dict(d=d, h=h, m=m, s=s)
-    return ', '.join(f"{data[i]:.2f} {i}" for i in data if data[i])
+    return ', '.join(f"{data[i]}{i}" for i in data if data[i])
 
 
 def ftime_ns(ns):
@@ -28,7 +28,7 @@ def ftime_ns(ns):
         return f"{ns / 1e3:.2f} \u00B5s"
     elif ns < 1e9:
         return f"{ns / 1e6:.2f} ms"
-    return ftime(ns / 1e9)
+    return ftime(int(ns / 1e9))
 
 
 def flatten(data):
