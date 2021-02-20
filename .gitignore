@@ -125,4 +125,5 @@ dmypy.json
 .pyre/
 
 # User-defined
-hackyupload.sh
+unreleased/
+experimentation/

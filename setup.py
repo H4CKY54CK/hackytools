@@ -1,12 +1,8 @@
-import re
-from setuptools import find_packages, setup
-import os
+from setuptools import setup
+import hackytools
 
-HERE = os.path.abspath(os.path.dirname(__file__))
-PACKAGE_NAME = 'hackytools'
-
-with open(os.path.join(HERE, PACKAGE_NAME, "__init__.py"), encoding="utf-8") as fp:
-    VERSION = re.search(r'''_*version_* *= *['|"](\d+(\.\d/*)*\w*)['|"]''', fp.read()).group(1)
+PACKAGE_NAME = hackytools.__package_name__
+VERSION =  hackytools.__version__
 
 with open('README.md') as f:
     README = f.read()
@@ -20,15 +16,13 @@ setup(name=PACKAGE_NAME,
       long_description_content_type="text/markdown",
       author='Hackysack',
       author_email='tk13xr37@gmail.com',
-      packages=find_packages(exclude=[]),
-      install_requires=['speedtest-cli', 'pillow<=8.0.1'],
+      packages=['hackytools'],
+      tests_require=['pytest'],
+      install_requires=['pillow', 'more-itertools'],
       python_requires='>=3.6',
       entry_points={'console_scripts':
         [
-            'bork = hackytools.cli:main',
-            'whatsmyip = hackytools.cli:main',
-            'whatsmyspeed = hackytools.cli:main',
-            'spriteit = hackytools.cli:main',
-            'gifit = hackytools.cli:main',
+            'fetchip = hackytools.cli:main',
+            'sysutils = hackytools.cli:main',
         ]
       })

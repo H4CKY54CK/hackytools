@@ -1,10 +1,7 @@
 import os
 import sys
-import shutil
 import platform
-import argparse
 import subprocess
-import re
 
 
 # Create our own exception. Common practise for exceptions
@@ -53,7 +50,7 @@ def frequency():
             # place holder print statement
             sys.stdout.write(f"\x1b[4mCPU ID\t Current Freq\t Max Freq\x1b[0m\n")
             for cpu in range(os.cpu_count()):
-                sys.stdout.write(f"CPU{cpu}\t {current_freq}\t " + " "*(len("Current Freq")//2) + f" {max_freq}\n")
+                sys.stdout.write(f"CPU{cpu}\t {current_freq}\t " + " " * (len("Current Freq") // 2) + f" {max_freq}\n")
         except Exception as e:
             raise InfoError(f"Could Not Determine CPU frequency: {e}")
         else:
@@ -67,31 +64,8 @@ def temperature():
             data = int(f.read()) / 1000
         sys.stdout.write(f"\x1b[4mTemperature\x1b[0m\n  {data:.1f}\u00b0C | {data * 9 / 5 + 32:.1f}\u00b0F\n")
 
-    # Specific to my device only.
-    # else:
-    #     process = subprocess.run('sensors nvme-pci-0100 amdgpu-pci-0400', capture_output=True, shell=True)
-    #     return_code = process.returncode
-
-    #     if process.returncode != 0:
-    #         return
-
-    #     output = process.stdout.decode()
-
-    #     cpu_pattern = re.compile(r'(Composite: *\+)(\d+(\.\d*))')
-    #     gpu_pattern = re.compile(r'(edge: *\+)(\d+(\.\d*))')
-
-    #     ctc = float(cpu_pattern.search(output).group(2))
-    #     gtc = float(gpu_pattern.search(output).group(2))
-    #     ctf = ctc * 9 / 5 + 32
-    #     gtf = gtc * 9 / 5 + 32
-
-    #     cpu_temp = f"{ctc:.1f}\u00b0C | {ctf:.1f}\u00b0F"
-    #     gpu_temp = f"{gtc:.1f}\u00b0C | {gtf:.1f}\u00b0F"
-
-    #     sys.stdout.write(f"\x1b[4mCPU Temp\x1b[0m\n  {cpu_temp}\n\x1b[4mGPU Temp\x1b[0m\n  {gpu_temp}\n")
-
-
-def bork(args):
+# TODO: Consider having these build a response, and then return it
+def sysutils(args):
     details()
     frequency()
     temperature()
