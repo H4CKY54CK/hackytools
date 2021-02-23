@@ -1,5 +1,8 @@
 import sys
 
+__all__ = [
+    'readkey',
+]
 
 if sys.platform == 'win32':
     import msvcrt

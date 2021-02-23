@@ -2,7 +2,7 @@ import os
 import sys
 import platform
 import subprocess
-
+import argparse
 
 # Create our own exception. Common practise for exceptions
 class InfoError(Exception):
@@ -66,6 +66,18 @@ def temperature():
 
 # TODO: Consider having these build a response, and then return it
 def sysutils(args):
-    details()
-    frequency()
-    temperature()
+    result = [
+        details(),
+        frequency(),
+        temperature(),
+    ]
+    return '\n'.join(i for i in result if i)
+
+def main(argv=None):
+
+    argv = (argv or sys.argv)[1:]
+    parser = argparse.ArgumentParser(description="A simple tool that shows some basic system stats at a glance.")
+    parser.set_defaults(func=sysutils)
+
+    args = parser.parse_args(argv)
+    return args.func(args=args)

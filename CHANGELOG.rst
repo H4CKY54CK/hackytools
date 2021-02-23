@@ -4,6 +4,20 @@ Change Log
 Unreleased
 ----------
 
+**Added**
+
+* New function measurement decorator `perf`. It is far more efficient in it's measurements than the other two, but I believe all three function timers each serve their own purpose.
+* New function `readkey` for reading either a single character or a keystroke in the terminal. Does not require sequences to be stored locally. Windows support needs further confirmation.
+* Added a test for `ftime` and `ftime_ns`. Yes, that's all the tests we have right now. We'll get there.
+* Added many docstrings, where applicable.
+* Added Windows support for `sysutils` (formerly known as `bork`).
+* Added `fetchip`, to get your IPv4, IPv6, or local IP address at any time (requires internet, of course).
+
+**Changed**
+
+* Completely overhauled the library. This reduced dependencies, cleaned up  unnecessary code, and organized everything.
+
+
 0.2.0 (2021/1/8)
 -----------------
 
@@ -18,7 +32,7 @@ Due to an accidental overwrite, we're now 0.0.1 version behind. Due to this, we 
 
 **Changed**
 
-* Overhaulled the entire CLI system, allowing for a cleaner parsing system. The actual commands haven't changed, but the underlying parser has. This will allow for better organization of the different parts of the parser.
+* Overhauled the entire CLI system, allowing for a cleaner parsing system. The actual commands haven't changed, but the underlying parser has. This will allow for better organization of the different parts of the parser.
 * Changed the extension of `LICENSE` to make it easier for anyone to open and view the contents.
 
 0.1.2 (2020/12/29)

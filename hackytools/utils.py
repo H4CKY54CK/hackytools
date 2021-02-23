@@ -4,7 +4,7 @@ import sys
 
 def ftime(seconds):
     """
-    Convert seconds into a human-readable format.
+    Convert seconds into a human-readable format (up to weeks).
     """
 
     if seconds < 1:
@@ -13,22 +13,26 @@ def ftime(seconds):
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
     d, h = divmod(h, 24)
-    data = dict(d=d, h=h, m=m, s=s)
+    w, d = divmod(d, 7)
+    data = dict(w=w, d=d, h=h, m=m, s=s)
     return ', '.join(f"{data[i]}{i}" for i in data if data[i])
 
 
 def ftime_ns(ns):
     """
-    Convert nanoseconds into a human-readable format.
+    Convert nanoseconds into a human-readable format (down to nanoseconds).
     """
 
-    if ns < 1e3:
+    # Using hex numbers because we're ridiculous.
+    if ns < 0x3e8:
         return f"{ns:.2f} ns"
-    elif ns < 1e6:
-        return f"{ns / 1e3:.2f} \u00B5s"
-    elif ns < 1e9:
-        return f"{ns / 1e6:.2f} ms"
-    return ftime(int(ns / 1e9))
+    elif ns < 0xf4240:
+        return f"{ns / 0x3e8:.2f} \u00B5s"
+    elif ns < 0x3b9aca00:
+        return f"{ns / 0xf4240:.2f} ms"
+    elif ns < 0xdf8475800:
+        return f"{ns / 0x3b9aca00:.1f} s"
+    return ftime(int(ns // 0x3b9aca00))
 
 
 def flatten(data):
@@ -68,5 +72,4 @@ def pbar(it):
         yield c
 
     fill = f"\x1b[42m{' ' * z}\x1b[0m"
-
     sys.stdout.write(f"\x1b[uProgress: |{fill}| ({1:>6.1%})\x1b[0K\x1b[?25h\n")

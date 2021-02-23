@@ -2,9 +2,10 @@ from urllib.request import urlopen
 import urllib.error
 import sys
 import subprocess
+import argparse
 
 
-def fetchip(*, protocols: list = None, local: bool = False, timeout: float = 3.0, args=None):
+def fetchip(*, protocols:list=None, local:bool=False, timeout:float=3.0, args=None):
     """
     A convenience tool for getting any combination of your IPv4, IPv6, and local IP addresses.
     """
@@ -43,3 +44,19 @@ def fetchip(*, protocols: list = None, local: bool = False, timeout: float = 3.0
     if args:
         return '\n'.join(results.values())
     return results
+
+
+def main(argv=None):
+    argv = (argv or sys.argv)[1:]
+    parser = argparse.ArgumentParser(description="A simple tool that shows your local/public IP")
+    
+    parser.add_argument('protocols', nargs='*', type=int,
+                        help="return one or more protocols: choose from (4, 6) - (omitting this argument fetches both)")
+    parser.add_argument('--timeout', '-t', dest='timeout', type=float, default=3.0,
+                        help="set a timeout period for the request made - (defaults to 3 sec)")
+    parser.add_argument('--local', '-l', dest='local', action='store_true',
+                        help="include your local IP address in the results")
+    parser.set_defaults(func=fetchip)
+
+    args = parser.parse_args(argv)
+    return args.func(args=args)
