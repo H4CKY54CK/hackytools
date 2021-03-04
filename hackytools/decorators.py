@@ -3,6 +3,7 @@ import time
 import sys
 from functools import wraps
 from .utils import ftime_ns
+from itertools import repeat
 
 
 def elapsed(func):
@@ -14,7 +15,7 @@ def elapsed(func):
             ts = time.perf_counter_ns()
             result = func(*args, **kwargs)
             te = time.perf_counter_ns()
-            end = ts - te
+            end = te - ts
             sys.stdout.write(f"{func.__qualname__!r} elapsed: {ftime_ns(end)}\n")
             return result
         finally:
@@ -23,7 +24,7 @@ def elapsed(func):
     return wrapper
 
 
-def bestof(argument=None, freq=7):
+def bestof(argument=None, loops=17):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -31,7 +32,7 @@ def bestof(argument=None, freq=7):
             old = gc.isenabled()
             gc.disable()
             try:
-                for _ in range(freq + 1):
+                for _ in range(loops + 1):
                     ts = time.perf_counter_ns()
                     result = func(*args, **kwargs)
                     te = time.perf_counter_ns()
@@ -41,7 +42,7 @@ def bestof(argument=None, freq=7):
                 avg = ftime_ns(sum(times) / len(times))
                 best = ftime_ns(min(times))
                 worst = ftime_ns(max(times))
-                msg = f"{func.__qualname__!r} stats: avg: {avg} | best: {best} | worst: {worst} | loops: {freq:,}\n"
+                msg = f"{func.__qualname__!r} stats: avg: {avg} | best: {best} | worst: {worst} | loops: {loops:,}\n"
                 sys.stdout.write(msg)
                 return result
             finally:
@@ -50,11 +51,11 @@ def bestof(argument=None, freq=7):
         return wrapper
     if callable(argument):
         return decorator(argument)
-    freq = argument
+    loops = argument
     return decorator
 
 
-def perf(argument, loops=13):
+def perf(argument, loops=17):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -62,8 +63,8 @@ def perf(argument, loops=13):
             gc.disable()
             try:
                 ts = time.perf_counter_ns()
-                for _ in range(loops):
-                    result = func(*args, **kwargs)
+                for f in repeat(func, loops):
+                    result = f(*args, **kwargs)
                 te = time.perf_counter_ns()
                 avg = ftime_ns((te - ts) / loops)
                 name = repr(func.__qualname__)

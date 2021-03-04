@@ -10,10 +10,10 @@ def ftime(seconds):
     if seconds < 1:
         ns = seconds * 1e9
         return ftime_ns(ns)
-    m, s = divmod(seconds, 60)
-    h, m = divmod(m, 60)
-    d, h = divmod(h, 24)
-    w, d = divmod(d, 7)
+    (m, s) = divmod(seconds, 60)
+    (h, m) = divmod(m, 60)
+    (d, h) = divmod(h, 24)
+    (w, d) = divmod(d, 7)
     data = dict(w=w, d=d, h=h, m=m, s=s)
     return ', '.join(f"{data[i]}{i}" for i in data if data[i])
 
@@ -23,16 +23,15 @@ def ftime_ns(ns):
     Convert nanoseconds into a human-readable format (down to nanoseconds).
     """
 
-    # Using hex numbers because we're ridiculous.
-    if ns < 0x3e8:
+    if ns < 1000:
         return f"{ns:.2f} ns"
-    elif ns < 0xf4240:
-        return f"{ns / 0x3e8:.2f} \u00B5s"
-    elif ns < 0x3b9aca00:
-        return f"{ns / 0xf4240:.2f} ms"
-    elif ns < 0xdf8475800:
-        return f"{ns / 0x3b9aca00:.1f} s"
-    return ftime(int(ns // 0x3b9aca00))
+    elif ns < 1000000:
+        return f"{ns / 1000:.2f} \u00B5s"
+    elif ns < 1000000000:
+        return f"{ns / 1000000:.2f} ms"
+    elif ns < 3000000000:
+        return f"{ns / 1000000000:.1f} s"
+    return ftime(int(ns // 1000000000))
 
 
 def flatten(data):

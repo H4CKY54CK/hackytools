@@ -22,7 +22,10 @@ def fetchip(*, protocols:list=None, local:bool=False, timeout:float=3.0, args=No
         if local:
             protocols = []
         else:
-            protocols = [i for i in args.protocols if i in urls] or [4, 6]
+            protocols = []
+            for i in args.protocols:
+                if i in urls:
+                    protocols.append(i)
         timeout = args.timeout
 
     results = {}
@@ -42,8 +45,8 @@ def fetchip(*, protocols:list=None, local:bool=False, timeout:float=3.0, args=No
             pass
 
     if args:
-        return '\n'.join(results.values())
-    return results
+        return '\n'.join(results.values()) if results else None
+    return results or None
 
 
 def main(argv=None):

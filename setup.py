@@ -22,7 +22,7 @@ setup(name=PACKAGE_NAME,
       python_requires='>=3.6',
       entry_points={'console_scripts':
         [
-            'fetchip = hackytools.cli:main',
-            'sysutils = hackytools.cli:main',
+            'fetchip = hackytools.netutils:main',
+            'sysutils = hackytools.sysutils:main',
         ]
       })
