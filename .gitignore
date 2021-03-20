@@ -127,3 +127,4 @@ dmypy.json
 # User-defined
 unreleased/
 experimentation/
+hackytools/__pycache__/

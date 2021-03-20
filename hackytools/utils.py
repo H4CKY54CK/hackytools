@@ -1,5 +1,4 @@
-import os
-import sys
+from collections import namedtuple
 
 
 def ftime(seconds):
@@ -7,14 +6,12 @@ def ftime(seconds):
     Convert seconds into a human-readable format (up to weeks).
     """
 
-    if seconds < 1:
-        ns = seconds * 1e9
-        return ftime_ns(ns)
-    (m, s) = divmod(seconds, 60)
-    (h, m) = divmod(m, 60)
-    (d, h) = divmod(h, 24)
-    (w, d) = divmod(d, 7)
-    data = dict(w=w, d=d, h=h, m=m, s=s)
+    m, s = divmod(seconds, 60)
+    h, m = divmod(m, 60)
+    d, h = divmod(h, 24)
+    w, d = divmod(d, 7)
+    y, w = divmod(w, 52)
+    data = dict(y=y, w=w, d=d, h=h, m=m, s=s)
     return ', '.join(f"{data[i]}{i}" for i in data if data[i])
 
 
@@ -29,14 +26,12 @@ def ftime_ns(ns):
         return f"{ns / 1000:.2f} \u00B5s"
     elif ns < 1000000000:
         return f"{ns / 1000000:.2f} ms"
-    elif ns < 3000000000:
-        return f"{ns / 1000000000:.1f} s"
-    return ftime(int(ns // 1000000000))
+    return f"{ns / 1000000000:.2f} s"
 
 
 def flatten(data):
     """
-    Flatten a list of any nestedness.
+    Flatten a list/tuple/set of any nestedness.
     """
 
     result = []
@@ -48,27 +43,28 @@ def flatten(data):
     return result
 
 
-def pbar(it):
+_smart = namedtuple("SmartIter", ('value', 'first', 'last'))
+
+
+def smiter(iterable):
     """
-    Responsive Terminal Design progress bar. Clears the bar when complete.
+    Returns a namedtuple that is aware of its first and last items by wrapping each
+    item in a namedtuple with several useful attributes. Keep in mind, an iterable
+    containing a single item will result in it being both first and last.
+
+    Attributes
+    ----------
+    value - an object from the given iterable
+    first - whether it's the first element
+    last - whether it's the last element
     """
 
-    total = sum(1 for _ in iter(it))
-    sys.stdout.write('\x1b[?25l\x1b[s')
-    it = iter(it)
-    for i in range(total):
-        c = next(it)
-        w = os.get_terminal_size().columns
-
-        # 22 is the amount of characters around the progress bar. Manual for now.
-        z = w - 22
-        l = int(i / total * z)
-        fill = f"\x1b[42m{' ' * l}\x1b[0m{' ' * (z - l)}"
-        p = i / total
-
-        sys.stdout.write(f"\x1b[uProgress: |{fill}| ({p:>6.1%})\x1b[0K")
-        sys.stdout.write("\x1b[B\x1b[2K")
-        yield c
-
-    fill = f"\x1b[42m{' ' * z}\x1b[0m"
-    sys.stdout.write(f"\x1b[uProgress: |{fill}| ({1:>6.1%})\x1b[0K\x1b[?25h\n")
+    it = iter(iterable)
+    first, last = True, False
+    peek = next(it, None)
+    while peek is not None:
+        item, peek = peek, next(it, None)
+        if peek is None:
+            last = True
+        yield _smart(item, first, last)
+        first = False
