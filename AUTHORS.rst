@@ -8,3 +8,9 @@ Source Contributors
 ===================
 
 - Scot_Survivor `@Scot-Survivor <https://github.com/Scot-Survivor>`
+
+
+Misc. Contributors
+==================
+
+- Rainbow Asteroids
