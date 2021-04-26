@@ -19,7 +19,7 @@ setup(
     author_email='tk13xr37@gmail.com',
     packages=['hackytools'],
     # tests_require=['pytest'],
-    install_requires=['pillow'],
+    # install_requires=['pillow'],
     python_requires='>=3.6',
     entry_points={'console_scripts':
         [
