@@ -84,9 +84,9 @@ def smiter(iterable):
 
 def splitint(item):
     """
-    Split an integer into decimal places (ones, tens, hundreds, etc) using math.
+    Split an integer into decimal places (ones, tens, hundreds, etc) using math, if possible.
     """
 
     if isinstance(item, int):
         return [item // (10 ** i) % 10 for i in range(math.floor(math.log10(item)), -1, -1)]
-    return tuple(item)
+    return list(map(int,item))
