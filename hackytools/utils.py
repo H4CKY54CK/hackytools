@@ -1,6 +1,18 @@
 from collections import namedtuple
 import math
+import itertools
+import re
 
+
+
+def combutations(data, n=None, *, reverse=False):
+    """
+    Return a combination of all unique permutations of the provided data.
+    """
+    if not reverse:
+        yield from (item for i in range(1, (n or len(data)) + 1, 1) for item in itertools.combinations(data, i))
+    else:
+        yield from (item for i in range(n or len(data), 0, -1) for item in itertools.combinations(data, i))
 
 
 def flatten(data):
@@ -87,6 +99,8 @@ def splitint(item):
     Split an integer into decimal places (ones, tens, hundreds, etc) using math, if possible.
     """
 
+    if item == 0:
+        return [0]
     if isinstance(item, int):
         return [item // (10 ** i) % 10 for i in range(math.floor(math.log10(item)), -1, -1)]
     return list(map(int,item))

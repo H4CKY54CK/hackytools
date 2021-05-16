@@ -1,5 +1,14 @@
 from hackytools.utils import *
 
+
+def test_combutations():
+    data = 'ABC'
+    assert list(combutations(data)) == [('A',), ('B',), ('C',), ('A', 'B'), ('A', 'C'), ('B', 'C'), ('A', 'B', 'C')]
+    assert list(combutations(data, 2)) == [('A',), ('B',), ('C',), ('A', 'B'), ('A', 'C'), ('B', 'C')]
+    assert list(combutations(data, reverse=True)) == [('A', 'B', 'C'), ('A', 'B'), ('A', 'C'), ('B', 'C'), ('A',), ('B',), ('C',)]
+    assert list(combutations(data, 2, reverse=True)) == [('A', 'B'), ('A', 'C'), ('B', 'C'), ('A',), ('B',), ('C',)]
+
+
 def test_ftime_ns():
     data = (
         (0, '0', 'ns'),

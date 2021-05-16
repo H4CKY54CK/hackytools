@@ -16,17 +16,19 @@ def fetchip(*, protocols:list=None, local:bool=False, timeout:float=3.0, args=No
     }
     if protocols is None:
         protocols = []
-    if args:
 
+    if args:
         local = args.local
-        if local:
+        if local and args.protocols is None:
             protocols = []
+        elif not local and args.protocols is None:
+            protocols = [4]
         else:
             protocols = []
             for i in args.protocols:
                 if i in urls:
                     protocols.append(i)
-        timeout = args.timeout
+            timeout = args.timeout
 
     results = {}
     for i in protocols:
@@ -46,15 +48,15 @@ def fetchip(*, protocols:list=None, local:bool=False, timeout:float=3.0, args=No
 
     if args:
         return '\n'.join(results.values()) if results else None
-    return results or '???'
+    return results
 
 
 def main(argv=None):
     argv = (argv or sys.argv)[1:]
     parser = argparse.ArgumentParser(description="A simple tool that shows your local/public IP")
     
-    parser.add_argument('protocols', nargs='*', type=int, default=[4],
-                        help="return one or more protocols: choose from (4, 6) - (omitting this argument fetches both)")
+    parser.add_argument('protocols', nargs='*', type=int, default=None,
+                        help="return one or more protocols: choose one or more of [4, 6] to get your IPv4 or IPv6 or both")
     parser.add_argument('--timeout', '-t', dest='timeout', type=float, default=3.0,
                         help="set a timeout period for the request made - (defaults to 3 sec)")
     parser.add_argument('--local', '-l', dest='local', action='store_true',
