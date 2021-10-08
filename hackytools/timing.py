@@ -1,7 +1,7 @@
 import gc
 import time
 import functools
-from .utils import ftime_ns
+from .utils import ftime_ns, ftime
 import itertools
 import math
 
@@ -59,7 +59,7 @@ def autoperf(func):
     @functools.wraps(func)
     def inner(*args, **kwargs):
         try:
-            timer = time.perf_counter_ns
+            timer = time.perf_counter
             gcold = gc.isenabled()
             gc.disable()
 
@@ -67,7 +67,7 @@ def autoperf(func):
             ts = timer()
             func(*args, **kwargs)
             te = timer()
-            dur = te - ts
+            dur = (te - ts) * 1000000000
             poss = 100000000 // dur
             n = 10 ** int(math.log10(poss))
 
@@ -75,7 +75,7 @@ def autoperf(func):
             for f in itertools.repeat(func, n // 10):
                 f(*args, **kwargs)
             te = timer()
-            dur = (te - ts) / (n // 10)
+            dur = ((te - ts) * 1000000000) / (n // 10)
             poss = 100000000 // dur
             n = 10 ** int(math.log10(poss))
 
@@ -86,7 +86,7 @@ def autoperf(func):
                 for f in itertools.repeat(func, n):
                     f(*args, **kwargs)
                 te = timer()
-                dur = (te - ts) / n
+                dur = ((te - ts) * 1000000000) / n
                 times.append(dur)
             best = ftime_ns(min(times))
             avg = ftime_ns(sum(times) / len(times))
