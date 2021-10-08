@@ -128,3 +128,4 @@ dmypy.json
 unreleased/
 experimentation/
 hackytools/__pycache__/
+hackytools/*.pyx

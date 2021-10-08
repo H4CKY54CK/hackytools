@@ -17,6 +17,9 @@ Unreleased
 
 * Completely overhauled the library. This reduced dependencies, cleaned up  unnecessary code, and organized everything.
 
+**Removed**
+
+* `smiter` because it was kind of pointless.
 
 0.2.0 (2021/1/8)
 -----------------

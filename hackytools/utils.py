@@ -9,6 +9,7 @@ def combutations(data, n=None, *, reverse=False):
     """
     Return a combination of all unique permutations of the provided data.
     """
+
     if not reverse:
         yield from (item for i in range(1, (n or len(data)) + 1, 1) for item in itertools.combinations(data, i))
     else:
@@ -29,69 +30,76 @@ def flatten(data):
     return result
 
 
-def ftime(seconds, kind=None):
-    if kind == 'macro':
-        return ftime_seconds(seconds)
-    return ftime_ns(seconds * 1000000000)
-
-
-def ftime_seconds(seconds, unit=None):
+def ftime_ns(nanoseconds, precision=2, spaced=None):
     """
-    Convert seconds into a human-readable format (up to weeks).
+    Convert nanoseconds into a human-readable format (small units).
     """
 
-    if unit in ('ns', 'nanoseconds'):
-        seconds /= 1000000000
-    elif unit in ('us', 'microseconds'):
-        seconds /= 1000000
-    elif unit in ('ms', 'milliseconds'):
-        seconds /= 1000
-    minute, second = divmod(seconds, 60)
-    hour, minute = divmod(minute, 60)
-    day, hour = divmod(hour, 24)
-    week, day = divmod(day, 7)
-    year, week = divmod(week, 52)
-    data = dict(year=year, week=week, day=day, hour=hour, minute=minute, second=second)
-    return ', '.join(f"{int(data[i])}{i[0]}" for i in data if data[i])
+    # shorten the variable name to keep line length under 100 lol
+    ns = nanoseconds
+    if ns < 1000:
+        if spaced is True or spaced is None:
+            return "{ns:.{precision}f} ns".format(ns=ns, precision=precision)
+        return "{ns:.{precision}f}ns".format(ns=ns, precision=precision)
+
+    elif ns < 1000000:
+        if spaced is True or spaced is None:
+            return "{ns:.{precision}f} \u00b5s".format(ns=ns / 1000, precision=precision)
+        return "{ns:.{precision}f}\u00b5s".format(ns=ns / 1000, precision=precision)
+
+    elif ns < 1000000000:
+        if spaced is True or spaced is None:
+            return "{ns:.{precision}f} ms".format(ns=ns / 1000000, precision=precision)
+        return "{ns:.{precision}f}ms".format(ns=ns / 1000000, precision=precision)
+
+    if spaced is True or spaced is None:
+        return "{ns:.{precision}f} s".format(ns=ns / 1000000000, precision=precision)
+    return "{ns:.{precision}f}s".format(ns=ns / 1000000000, precision=precision)
 
 
-def ftime_ns(nanoseconds):
+def ftime(seconds, spaced=None):
     """
-    Convert nanoseconds into a human-readable format (down to nanoseconds).
-    """
-
-    if nanoseconds < 1000:
-        return "%.2f ns" % (nanoseconds)
-    elif nanoseconds < 1000000:
-        return "%.2f \u00B5s" % (nanoseconds / 1000)
-    elif nanoseconds < 1000000000:
-        return "%.2f ms" % (nanoseconds / 1000000)
-    return "%.2f s" % (nanoseconds / 1000000000)
-
-
-def smiter(iterable):
-    """
-    Returns a namedtuple that is aware of its first and last items by wrapping each
-    item in a namedtuple with several useful attributes. Keep in mind, an iterable
-    containing a single item will result in it being both first and last.
-
-    Attributes
-    ----------
-    value - an object from the given iterable
-    first - whether it's the first element
-    last - whether it's the last element
+    Convert seconds into a human-readable format (small units).
     """
 
-    _smart = namedtuple("SmartIter", ('value', 'first', 'last'))
-    it = iter(iterable)
-    first, last = True, False
-    peek = next(it, None)
-    while peek is not None:
-        item, peek = peek, next(it, None)
-        if peek is None:
-            last = True
-        yield _smart(item, first, last)
-        first = False
+    return ftime_ns(seconds * 1000000000, spaced=spaced)
+
+
+def rem_time(seconds, abbreviate=False, spaced=None):
+    """
+    Convert seconds into remaining time (up to years).
+    """
+
+    units = ['years', 'weeks', 'days', 'hours', 'minutes', 'seconds']
+    data = {item: 0 for item in units}
+
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    days, hours = divmod(hours, 24)
+    weeks, days = divmod(days, 7)
+    years, weeks = divmod(weeks, 52)
+
+    data.update(seconds=seconds, minutes=minutes, hours=hours, days=days, weeks=weeks, years=years)
+
+    if abbreviate is True:
+        if spaced is True:
+            return ', '.join('%d %s' % (v, k[0]) for k,v in data.items() if v != 0)
+        return ', '.join('%d%s' % (v, k[0]) for k,v in data.items() if v != 0)
+
+    result = []
+    for k,v in data.items():
+        if v > 1:
+            if spaced is True or spaced is None:
+                result.append('%d %s' % (v, k))
+            elif spaced is False:
+                result.append('%d%s' % (v, k))
+        elif v == 1:
+            if spaced is True or spaced is None:
+                result.append('%d %s' % (v, k[:-1]))
+            elif spaced is False:
+                result.append('%d%s' % (v, k[:-1]))
+
+    return ', '.join(result)
 
 
 def splitint(item):
@@ -101,6 +109,6 @@ def splitint(item):
 
     if item == 0:
         return [0]
-    if isinstance(item, int):
+    elif isinstance(item, int):
         return [item // (10 ** i) % 10 for i in range(math.floor(math.log10(item)), -1, -1)]
     return list(map(int,item))
