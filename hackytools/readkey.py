@@ -7,10 +7,11 @@ __all__ = [
 if sys.platform == 'win32':
     import msvcrt
     def readkey():
-        ch = msvcrt.getch()
+        key = msvcrt.getch()
+        keys = [key]
         while msvcrt.kbhit():
-            ch += msvcrt.getch()
-        return ch
+            keys.append(msvcrt.getch())
+        return "".join(keys)
 
 else:
     import tty
@@ -28,23 +29,46 @@ else:
         return character
 
 
-    def readkey(single=None):
-        result = _read()
-        if not single and result == '\x1b':
-            b = _read()
-            result += b
-            if b == '[':
+    def readkey(single=False):
+        key = _read()
+        keys = [key]
+        if single is False and ord(key) == 27:
+            key = _read()
+            keys.append(key)
+            if key == '[':
                 while True:
-                    b = _read()
-                    result += b
-                    if b.isalpha() or b == '~':
+                    key = _read()
+                    keys.append(key)
+                    if key.isalpha() or key == '~':
                         break
-            elif b.isdigit():
+            elif key.isdigit():
                 while True:
-                    b = _read()
-                    result += b
-                    if b.isalpha() or b == '~':
+                    key = _read()
+                    keys.append(key)
+                    if key.isalpha() or key == '~':
                         break
-            elif b.isalpha():
-                result += _read()
-        return result
+            elif key.isalpha():
+                key = _read()
+                keys.append(key)
+        return "".join(keys)
+
+    # def readkey(single=False):
+    #     key = _read()
+    #     if not single and ord(key) == 27:
+    #         b = _read()
+    #         key += b
+    #         if b == '[':
+    #             while True:
+    #                 b = _read()
+    #                 key += b
+    #                 if b.isalpha() or b == '~':
+    #                     break
+    #         elif b.isdigit():
+    #             while True:
+    #                 b = _read()
+    #                 key += b
+    #                 if b.isalpha() or b == '~':
+    #                     break
+    #         elif b.isalpha():
+    #             key += _read()
+    #     return key

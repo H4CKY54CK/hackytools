@@ -6,20 +6,22 @@ import itertools
 import math
 
 
+
 def elapsed(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
-            old = gc.isenabled()
-            gc.disable()
+            gcold = gc.isenabled()
+            if gcold:
+                gc.disable()
             ts = time.perf_counter_ns()
             result = func(*args, **kwargs)
             te = time.perf_counter_ns()
             end = te - ts
-            print(f"{func.__name__!r} elapsed: {ftime_ns(end)}")
+            print(f"{func.__qualname__!r} elapsed: {ftime_ns(end)}")
             return result
         finally:
-            if old:
+            if gcold:
                 gc.enable()
     return wrapper
 
@@ -29,9 +31,10 @@ def bestof(argument=None, loops=17):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             try:
+                gcold = gc.isenabled()
+                if gcold:
+                    gc.disable()
                 times = []
-                old = gc.isenabled()
-                gc.disable()
                 for _ in range(loops + 1):
                     ts = time.perf_counter_ns()
                     result = func(*args, **kwargs)
@@ -42,11 +45,11 @@ def bestof(argument=None, loops=17):
                 avg = ftime_ns(sum(times) / len(times))
                 best = ftime_ns(min(times))
                 worst = ftime_ns(max(times))
-                msg = f"{func.__name__!r} stats: avg: {avg} | best: {best} | worst: {worst} | loops: {loops:,}"
+                msg = f"{func.__qualname__!r} stats: avg: {avg} | best: {best} | worst: {worst} | loops: {loops:,}"
                 print(msg)
                 return result
             finally:
-                if old:
+                if gcold:
                     gc.enable()
         return wrapper
     if callable(argument):
@@ -55,113 +58,127 @@ def bestof(argument=None, loops=17):
     return decorator
 
 
-def autoperf(func):
-    @functools.wraps(func)
-    def inner(*args, **kwargs):
-        try:
-            timer = time.perf_counter
-            gcold = gc.isenabled()
-            gc.disable()
+# # Marked for removal
+# def autoperf(func):
+#     @functools.wraps(func)
+#     def inner(*args, **kwargs):
+#         try:
+#             gcold = gc.isenabled()
+#             if gcold:
+#                 gc.disable()
+#             timer = time.perf_counter
 
-            # Get an average
-            ts = timer()
-            func(*args, **kwargs)
-            te = timer()
-            dur = (te - ts) * 1000000000
-            poss = 100000000 // dur
-            n = 10 ** int(math.log10(poss))
+#             # Get an average
+#             ts = timer()
+#             func(*args, **kwargs)
+#             te = timer()
+#             dur = (te - ts) * 1000000000
+#             poss = 100000000 // dur
+#             n = 10 ** int(math.log10(poss))
 
-            ts = timer()
-            for f in itertools.repeat(func, n // 10):
-                f(*args, **kwargs)
-            te = timer()
-            dur = ((te - ts) * 1000000000) / (n // 10)
-            poss = 100000000 // dur
-            n = 10 ** int(math.log10(poss))
+#             ts = timer()
+#             for f in itertools.repeat(func, n // 10):
+#                 f(*args, **kwargs)
+#             te = timer()
+#             dur = ((te - ts) * 1000000000) / (n // 10)
+#             poss = 100000000 // dur
+#             n = 10 ** int(math.log10(poss))
 
-            r = 7
-            times = []
-            for _ in range(r):
-                ts = timer()
-                for f in itertools.repeat(func, n):
-                    f(*args, **kwargs)
-                te = timer()
-                dur = ((te - ts) * 1000000000) / n
-                times.append(dur)
-            best = ftime_ns(min(times))
-            avg = ftime_ns(sum(times) / len(times))
-            msg = f"{func.__name__!r}: best: {best} | avg: {avg} | x{r:,} rounds, {n:,} loops each"
-            print(msg)
-            return func(*args, **kwargs)
-        finally:
-            if gcold:
-                gc.disable()
-    return inner
+#             r = 7
+#             times = []
+#             for _ in range(r):
+#                 ts = timer()
+#                 for f in itertools.repeat(func, n):
+#                     f(*args, **kwargs)
+#                 te = timer()
+#                 dur = ((te - ts) * 1000000000) / n
+#                 times.append(dur)
+#             best = ftime_ns(min(times))
+#             avg = ftime_ns(sum(times) / len(times))
+#             msg = f"{func.__qualname__!r}: avg: {avg} | best: {best} | x{r:,} rounds, {n:,} loops each"
+#             print(msg)
+#             return func(*args, **kwargs)
+#         finally:
+#             if gcold:
+#                 gc.enable()
+#     return inner
 
 
-def perf(arg=None, loops=None, rounds=None, *, desc=None):
+def perf(loops=None, rounds=None, *, desc=None):
     def wrapper(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):
             try:
                 gcold = gc.isenabled()
-                gc.disable()
+                if gcold:
+                    gc.disable()
                 timer = time.perf_counter_ns
 
-                n = loops
-                r = rounds
+                _loops = loops
+                _rounds = rounds
 
-                if loops is None:
+                # If no args, it's up to us to make sure we don't make the user wait too long.
+                if loops is None and rounds is None:
+                    # Get single run time.
                     ts = timer()
                     func(*args, **kwargs)
                     te = timer()
                     dur = te - ts
-                    its = 100000000 // dur
-                    if its == 0:
+                    # Can loop roughly this many times in .1 second
+                    its = 100_000_000 // dur
+                    if its < 1:
                         its = 1
-                        r = 1000000000 // dur
-                        if r < 10:
-                            r = 1
-                    n = 10 ** int(math.log10(its))
+                    # Smooth out to a nice round power of 10
+                    _loops = 10 ** int(math.log10(its))
+                    _rounds = 1
 
+                    # Try to be more accurate for faster functions
                     if its > 100:
+                        subloops = _loops // 10
                         ts = timer()
-                        for f in itertools.repeat(func, n // 10):
+                        # itertools.repeat let's us loop faster than a normal for loop
+                        for f in itertools.repeat(func, subloops):
                             f(*args, **kwargs)
                         te = timer()
-                        dur = (te - ts) / (n // 10)
-                        its = 100000000 // dur
-                        n = 10 ** int(math.log10(its))
+                        dur = te - ts
+                        avg = dur / subloops
+                        its = 100_000_000 // avg
+                        _loops = 10 ** int(math.log10(its))
+                        _rounds = min(1_000_000_000 // its, 13)
+                else:
+                    _rounds = rounds or 1
+                    _loops = loops or 1
 
-                if r is None:
-                    r = 7 if loops is None else 1 if rounds is None else rounds
-                name = desc or func.__name__ # dont use qualname
-
-                # Warm up
-                for f in itertools.repeat(func, n // 10):
+                # Warming up smooths out the averages
+                for f in itertools.repeat(func, _loops // 10):
                     f(*args, **kwargs)
 
                 times = []
-                for _ in range(r):
+                for _ in range(_rounds):
                     ts = timer()
-                    for f in itertools.repeat(func, n):
-                        f(*args, **kwargs)
+                    for f in itertools.repeat(func, _loops):
+                        result = f(*args, **kwargs)
                     te = timer()
-                    dur = (te - ts) / n
+                    dur = (te - ts) / _loops
                     times.append(dur)
                 best = min(times)
                 avg = sum(times) / len(times)
-                msg = f"{name!r}: avg: {ftime_ns(avg)} | {n:,} loops"
-                if r > 1:
-                    msg = f"{name!r}: best: {ftime_ns(best)} | avg: {ftime_ns(avg)} | x{r:,} rounds, {n:,} loops each"
+
+                name = desc or func.__qualname__ # dont use qualname
+
+                msg = f"{name!r}: avg: {ftime_ns(avg)} | {_loops:,} loops"
+                if _rounds > 1:
+                    msg = f"{name!r}: avg: {ftime_ns(avg)} | best: {ftime_ns(best)} | x{_rounds:,} rounds, {_loops:,} loops each"
                 print(msg)
-                return func(*args, **kwargs)
+                return result
+            except Exception:
+                raise
             finally:
                 if gcold:
                     gc.enable()
         return inner
-    if callable(arg):
-        return wrapper(arg)
-    rounds = loops
-    loops = arg
+    if callable(loops):
+        func = loops
+        loops = None
+        return wrapper(func)
     return wrapper

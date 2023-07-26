@@ -9,6 +9,26 @@ def test_combutations():
     assert list(combutations(data, 2, reverse=True)) == [('A', 'B'), ('A', 'C'), ('B', 'C'), ('A',), ('B',), ('C',)]
 
 
+def test_flatten():
+    data = [1, [2, [3, [[[4,5,6,7,8,9]]]]]]
+    assert flatten(data) == list(range(1,10))
+
+
+def test_ftime():
+    data = (
+        (68546438444, '1m', '8s'),
+        (979779441123, '16m', '19s'),
+        (7977941341123, '2h, 12m', '57s'),
+        (97977941341123, '1d, 3h, 12m', '57s'),
+    )
+
+    for n, pre, after in data:
+        n /= 1000000000
+        res = ftime(n, keep_seconds=True)
+        assert res.startswith(pre), "Expected: %s | Got: %s" % (pre + ' ' + after, res)
+        assert res.endswith(after), "Expected: %s | Got: %s" % (pre + ' ' + after, res)
+
+
 def test_ftime_ns():
     data = (
         (0, '0', 'ns'),
@@ -29,7 +49,28 @@ def test_ftime_ns():
         assert res.endswith(after), "Expected: %s | Got: %s" % (pre + ' ' + after, res)
 
 
-def test_ftime():
+def test_is_prime():
+    primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+    not_primes = [i for i in range(50) if i not in primes]
+    for i in primes:
+        assert is_prime(i) is True
+    for i in not_primes:
+        assert is_prime(i) is False
+
+
+def test_n_primes():
+    primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+    assert len(n_primes(15)) == 15 and list(n_primes(15)) == primes
+    for i in range(5000):
+        assert len(n_primes(i)) == i
+
+
+def test_primes_to():
+    primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+    assert primes == list(primes_to(50))
+
+
+def test_rem_time():
     data = (
         (68546438444, '1m', '8s'),
         (979779441123, '16m', '19s'),
@@ -38,46 +79,9 @@ def test_ftime():
     )
 
     for n, pre, after in data:
-        n /= 1000000000
-        res = ftime(n, 'macro')
+        res = rem_time(n / 1000000000, abbreviate=True)
         assert res.startswith(pre), "Expected: %s | Got: %s" % (pre + ' ' + after, res)
         assert res.endswith(after), "Expected: %s | Got: %s" % (pre + ' ' + after, res)
-
-
-def test_ftime_seconds():
-    data = (
-        (68546438444, '1m', '8s'),
-        (979779441123, '16m', '19s'),
-        (7977941341123, '2h, 12m', '57s'),
-        (97977941341123, '1d, 3h, 12m', '57s'),
-    )
-
-    for n, pre, after in data:
-        n /= 1000000000
-        res = ftime_seconds(n)
-        assert res.startswith(pre), "Expected: %s | Got: %s" % (pre + ' ' + after, res)
-        assert res.endswith(after), "Expected: %s | Got: %s" % (pre + ' ' + after, res)
-
-
-def test_flatten():
-    data = [1, [2, [3, [[[4,5,6,7,8,9]]]]]]
-    assert flatten(data) == list(range(1,10))
-
-
-def test_smiter():
-    data = range(500)
-    for i in smiter(data):
-        if i.value == 0:
-            assert i.first is True and i.last is False
-        elif i.value == 499:
-            assert i.last is True and i.first is False
-        else:
-            assert i.first is not True and i.last is not True
-
-    data = [13]
-    for i in smiter(data):
-        assert i.last is True and i.first is True and i.value == 13
-
 
 def test_splitint():
     for i in range(1,307):
