@@ -1,110 +1,23 @@
 import gc
 import time
 import functools
-from .utils import ftime_ns, ftime
+from .utils import ftime_ns, ftime, powround10
 import itertools
 import math
 
 
 
-def elapsed(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            gcold = gc.isenabled()
-            if gcold:
-                gc.disable()
-            ts = time.perf_counter_ns()
-            result = func(*args, **kwargs)
-            te = time.perf_counter_ns()
-            end = te - ts
-            print(f"{func.__qualname__!r} elapsed: {ftime_ns(end)}")
-            return result
-        finally:
-            if gcold:
-                gc.enable()
-    return wrapper
+def perf(function=None, *, loops=None, rounds=None, desc=None, timer=time.perf_counter_ns):
+    """This is a decorator intended to measure the average runtime of the function it decorates. Use the keyword-only
+    arguments to customize the behaviour of this tool.
 
+    Note: This function replaces the old decorators 'elapsed' and 'bestof'.
 
-def bestof(argument=None, loops=17):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                gcold = gc.isenabled()
-                if gcold:
-                    gc.disable()
-                times = []
-                for _ in range(loops + 1):
-                    ts = time.perf_counter_ns()
-                    result = func(*args, **kwargs)
-                    te = time.perf_counter_ns()
-                    end = te - ts
-                    times.append(end)
-                times.remove(max(times))
-                avg = ftime_ns(sum(times) / len(times))
-                best = ftime_ns(min(times))
-                worst = ftime_ns(max(times))
-                msg = f"{func.__qualname__!r} stats: avg: {avg} | best: {best} | worst: {worst} | loops: {loops:,}"
-                print(msg)
-                return result
-            finally:
-                if gcold:
-                    gc.enable()
-        return wrapper
-    if callable(argument):
-        return decorator(argument)
-    loops = argument or loops
-    return decorator
-
-
-# # Marked for removal
-# def autoperf(func):
-#     @functools.wraps(func)
-#     def inner(*args, **kwargs):
-#         try:
-#             gcold = gc.isenabled()
-#             if gcold:
-#                 gc.disable()
-#             timer = time.perf_counter
-
-#             # Get an average
-#             ts = timer()
-#             func(*args, **kwargs)
-#             te = timer()
-#             dur = (te - ts) * 1000000000
-#             poss = 100000000 // dur
-#             n = 10 ** int(math.log10(poss))
-
-#             ts = timer()
-#             for f in itertools.repeat(func, n // 10):
-#                 f(*args, **kwargs)
-#             te = timer()
-#             dur = ((te - ts) * 1000000000) / (n // 10)
-#             poss = 100000000 // dur
-#             n = 10 ** int(math.log10(poss))
-
-#             r = 7
-#             times = []
-#             for _ in range(r):
-#                 ts = timer()
-#                 for f in itertools.repeat(func, n):
-#                     f(*args, **kwargs)
-#                 te = timer()
-#                 dur = ((te - ts) * 1000000000) / n
-#                 times.append(dur)
-#             best = ftime_ns(min(times))
-#             avg = ftime_ns(sum(times) / len(times))
-#             msg = f"{func.__qualname__!r}: avg: {avg} | best: {best} | x{r:,} rounds, {n:,} loops each"
-#             print(msg)
-#             return func(*args, **kwargs)
-#         finally:
-#             if gcold:
-#                 gc.enable()
-#     return inner
-
-
-def perf(loops=None, rounds=None, *, desc=None):
+    :param loops:   How many times iterations the function is called per round. (Default: None (automatic))
+    :param rounds:  How many is called per round. (Default: 7)
+    :param desc:    The text that is used as the label for the output. (Default: the decorated function's name)
+    :param timer:   The timer that is used to measure the runtime. (Default: time.perf_counter_ns)
+    """
     def wrapper(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):
@@ -112,73 +25,68 @@ def perf(loops=None, rounds=None, *, desc=None):
                 gcold = gc.isenabled()
                 if gcold:
                     gc.disable()
-                timer = time.perf_counter_ns
 
+                # Scope issue
                 _loops = loops
                 _rounds = rounds
+                _desc = desc or func.__qualname__
 
-                # If no args, it's up to us to make sure we don't make the user wait too long.
-                if loops is None and rounds is None:
-                    # Get single run time.
-                    ts = timer()
-                    func(*args, **kwargs)
-                    te = timer()
-                    dur = te - ts
-                    # Can loop roughly this many times in .1 second
-                    its = 100_000_000 // dur
-                    if its < 1:
-                        its = 1
-                    # Smooth out to a nice round power of 10
-                    _loops = 10 ** int(math.log10(its))
-                    _rounds = 1
-
-                    # Try to be more accurate for faster functions
-                    if its > 100:
-                        subloops = _loops // 10
-                        ts = timer()
-                        # itertools.repeat let's us loop faster than a normal for loop
-                        for f in itertools.repeat(func, subloops):
-                            f(*args, **kwargs)
-                        te = timer()
-                        dur = te - ts
-                        avg = dur / subloops
-                        its = 100_000_000 // avg
-                        _loops = 10 ** int(math.log10(its))
-                        _rounds = min(1_000_000_000 // its, 13)
+                # Timer setup and check
+                if not callable(timer):
+                    raise ValueError("not a valid timer")
+                _timer = timer
+                # Be smart about how we determine the resolution.
+                _test = _timer()
+                if isinstance(_test, int):
+                    _use_ns = True
+                elif isinstance(_test, float):
+                    _use_ns = False
                 else:
-                    _rounds = rounds or 1
-                    _loops = loops or 1
+                    raise ValueError("unknown timer resolution")
+                _ftime = ftime_ns if _use_ns else ftime
+                units = 1_000_000_000 if _use_ns else 1
 
-                # Warming up smooths out the averages
-                for f in itertools.repeat(func, _loops // 10):
-                    f(*args, **kwargs)
+                if _rounds is None:
+                    _rounds = 7
 
-                times = []
-                for _ in range(_rounds):
-                    ts = timer()
+                # IF AND ONLY IF the user doesn't provide the number of loops, THEN AND ONLY THEN may we determine the
+                # number of loops automatically. Don't exceed 5 seconds unless the user explicitly provides the number
+                # of loops. They have the ultimate say in what happens.
+                if _loops is None:
+                    total = 0
+                    start = _timer()
+                    # Run N times in a second
+                    while _timer() - start <= units:
+                        result = func(*args, **kwargs)
+                        total += 1
+                    _loops = powround10(total * 7 / _rounds)
+
+
+                # Actual code
+                data = []
+                for r in range(_rounds):
+                    start = _timer()
                     for f in itertools.repeat(func, _loops):
                         result = f(*args, **kwargs)
-                    te = timer()
-                    dur = (te - ts) / _loops
-                    times.append(dur)
-                best = min(times)
-                avg = sum(times) / len(times)
+                    end = _timer()
+                    dur = end - start
+                    data.append(dur / _loops)
 
-                name = desc or func.__qualname__ # dont use qualname
+                avg = sum(data) / len(data)
+                variance = [(avg - i) ** 2 for i in data]
+                avgvar = (sum(variance) / len(variance)) ** .5
 
-                msg = f"{name!r}: avg: {ftime_ns(avg)} | {_loops:,} loops"
-                if _rounds > 1:
-                    msg = f"{name!r}: avg: {ftime_ns(avg)} | best: {ftime_ns(best)} | x{_rounds:,} rounds, {_loops:,} loops each"
-                print(msg)
+                output = "%r: avg: %s \u00b1 %s per loop | x%s rounds, x%s loops per round" % \
+                    (_desc, _ftime(avg), _ftime(avgvar), format(_rounds, ","), format(_loops, ","))
+
+                print(output)
+
                 return result
-            except Exception:
-                raise
+
             finally:
                 if gcold:
                     gc.enable()
         return inner
-    if callable(loops):
-        func = loops
-        loops = None
-        return wrapper(func)
+    if callable(function):
+        return wrapper(function)
     return wrapper

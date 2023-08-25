@@ -25,40 +25,23 @@ def combutations(iterable, n, *, reverse=False):
         yield from (item for i in range(n or len(iterable), 0, -1) for item in itertools.combinations(iterable, i))
 
 
-def groups(iterable, size, *, fill=False, fill_value=None):
-    """
-    Takes a sequence/collection (whichever is technically correct) 'iterable' and returns them in groups of 'size'.
-
-    Example
-        If we want the letters of the alphabet, but in groups of 3 and no padding...
-        print(groups('abcdefghijklmnopqrstuvwxyz', 3))
-        # [('a', 'b', 'c'), ('d', 'e', 'f'), ..., ('v', 'w', 'x'), ('y', 'z')]
-
-    For the iterator/generator equivalent, use 'hackytools.iterators.groups'
-    """
-    total = math.ceil(len(iterable) / size)
-    new = [tuple(iterable[i*size:i*size+size]) for i in range(total)]
-    rem = size - len(new[-1])
-    if fill is True:
-        if rem > 0:
-            new[-1].extend([fill_value] * rem)
-    return new
-
-
 # Marked for removal.
 # On second thought. hashlib only provides this in 3.11+. We provide this for any Python?
 def file_digest(filename, *, algorithm="sha1", buffer=2**20):
     """
     A memory efficient function for computing the hexdigest of a given file. The algorithm used and the size of the
-    buffer used for reading from the file can both be changed by using the corresponding keyword arguments
+    buffer used for reading from the file can both be changed by using the corresponding keyword arguments.
 
     Note: Hashlib recently added a similar function to their module. The problem is that it is only available if you
     have that version of Python or higher. My library doesn't care what version you have.
 
-    :param algorithm: The algorithm to use to compute the hash. (Default: sha1)
+    :param algorithm: The algorithm used to compute the hash. Can also be a function. (Default: "sha1")
     :param buffer: The max amount of bytes to read from the given file at once. (Default: 2**20)
     """
-    m = hashlib.new(algorithm)
+    if callable(algorithm):
+        m = algorithm()
+    else:
+        m = hashlib.new(algorithm)
     with open(filename, "rb") as f:
         while True:
             block = f.read(buffer)
@@ -93,7 +76,7 @@ def flatten(data):
     return result
 
 
-def frate(n_bytes, seconds, *, precision=2, base=2):
+def frate(n_bytes: int, seconds: int | float, *, precision: int = 2, base: int = 2) -> str:
     """Calculate a given amount of bytes 'n_bytes' transferred over elapsed time 'seconds' and
     return the result in a human-readable format.
 
@@ -145,20 +128,13 @@ def fsize(amount: int, *, base: int = 10, precision: int = 2) -> str:
     return "%s %s" % (round(amount, precision), u)
 
 
-# Marked for review. Consider only delegating to `ftime_ns` since the name implies that's what it does.
-def ftime(seconds: int, spaced: bool = None, keep_seconds: bool = False) -> str:
-    """Convert seconds into a human-readable format (small units). Delegates to either 'rem_time' or 'ftime_ns'.
-
-    :param seconds: The amount of seconds to convert to a human-readable format.
-    :param spaced:  Whether or not to separate the value from the unit (i.e. "10ns" or "10 ns")
-    """
-    if seconds > 60 and keep_seconds is True:
-        return rem_time(seconds, spaced=spaced, abbreviate=True)
+def ftime(seconds: float, *args, **kwargs) -> str:
+    """Converts seconds to nanoseconds and then acts as an alias to ftime_ns."""
     return ftime_ns(seconds * 1000000000, spaced=spaced)
 
 
 # Marked for a review. Possibly belongs in a `hackytools.formatting` submodule?
-def ftime_ns(nanoseconds: int, precision: int = 2, spaced: bool = True) -> str:
+def ftime_ns(nanoseconds: int, *, precision: int = 2, spaced: bool = True) -> str:
     space = " " if spaced else ""
     if nanoseconds < 1000:
         return "%s%sns" % (format(nanoseconds, ".%df" % precision), space)
@@ -167,6 +143,26 @@ def ftime_ns(nanoseconds: int, precision: int = 2, spaced: bool = True) -> str:
     if nanoseconds < 1000000000:
         return "%s%sms" % (format(nanoseconds / 1000000, ".%df" % precision), space)
     return "%s%ss" % (format(nanoseconds / 1000000000, ".%df" % precision), space)
+
+
+def groups(iterable, size, *, fill=False, fill_value=None):
+    """
+    Takes a sequence/collection (whichever is technically correct) 'iterable' and returns them in groups of 'size'.
+
+    Example
+        If we want the letters of the alphabet, but in groups of 3 and no padding...
+        print(groups('abcdefghijklmnopqrstuvwxyz', 3))
+        # [('a', 'b', 'c'), ('d', 'e', 'f'), ..., ('v', 'w', 'x'), ('y', 'z')]
+
+    For the iterator/generator equivalent, use 'hackytools.iterators.groups'
+    """
+    total = math.ceil(len(iterable) / size)
+    new = [tuple(iterable[i*size:i*size+size]) for i in range(total)]
+    rem = size - len(new[-1])
+    if fill is True:
+        if rem > 0:
+            new[-1].extend([fill_value] * rem)
+    return new
 
 
 # Marked for review & possible removal?
@@ -258,6 +254,31 @@ def odd1out(data):
     :param data:    The list/tuple/set to "separate" into tuples of `(one_item, rest_of_items)`.
     """
     return tuple(iterators.odd1out(data))
+
+
+def powround(num, base=math.e):
+    """A rounding mechanism that mimicks math.log. Returns whichever power of 'base' is closest to 'num'.
+
+    :param base:    The base to use. For log2, use 2. For log10, use 10. (Default: math.e)
+    """
+    lo = base ** (math.ceil(math.log10(num)) - 1)
+    hi = base * lo
+    return lo if hi - num > num - lo else hi
+
+
+def powround1p(num):
+    """A rounding mechanism that mimicks math.log1p. Returns whichever power of math.e is closest to 'num' + 1."""
+    return powround(num + 1, base=math.e)
+
+
+def powround10(num):
+    """A rounding mechanism that mimicks math.log10. Returns whichever power of 10 is closest to 'num'."""
+    return powround(num, base=10)
+
+
+def powround2(num):
+    """A rounding mechanism that mimicks math.log2. Returns whichever power of 2 is closest to 'num'."""
+    return powround(num, base=2)
 
 
 # Possibly deserves to be in a `hackytools.math` submodule?
