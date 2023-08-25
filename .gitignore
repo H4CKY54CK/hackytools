@@ -125,7 +125,6 @@ dmypy.json
 .pyre/
 
 # User-defined
-unreleased/
-experimentation/
 hackytools/__pycache__/
-hackytools/*.pyx
+.gitignore
+Makefile
