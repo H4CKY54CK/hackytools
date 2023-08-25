@@ -147,7 +147,7 @@ def ftime(seconds: int, *, precision: int = 2, spaced: bool = True) -> str:
 def ftime_ns(nanoseconds: int, *, precision: int = 2, spaced: bool = True) -> str:
     """A formatting function for nanoseconds. Customize the output with the keyword-only parameters.
 
-    :param nanoseconds:     The amount of nanoseconds to convert to a human-readable format.
+    :param nanoseconds: The amount of nanoseconds to convert to a human-readable format.
     :param precision:   The floating point precision to use for the output. (Default: 2)
     :param spaced:      Whether to insert a space between the number and the unit. (Default: True)
     """
