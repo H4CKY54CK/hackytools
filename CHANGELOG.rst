@@ -4,22 +4,10 @@ Change Log
 Unreleased
 ----------
 
-**Added**
+Completely overhauled the library. Again. This time, with clear documentation, docstrings, type hints, and more. It's been so long that I honestly can't remember what I removed and added, so consider this a fresh start of sorts.
 
-* New function measurement decorator `perf`. It is far more efficient in it's measurements than the other two, but I believe all three function timers each serve their own purpose.
-* New function `readkey` for reading either a single character or a keystroke in the terminal. Does not require sequences to be stored locally. Windows support needs further confirmation.
-* Added a test for `ftime` and `ftime_ns`. Yes, that's all the tests we have right now. We'll get there.
-* Added many docstrings, where applicable.
-* Added Windows support for `sysutils` (formerly known as `bork`).
-* Added `fetchip`, to get your IPv4, IPv6, or local IP address at any time (requires internet, of course).
-
-**Changed**
-
-* Completely overhauled the library. This reduced dependencies, cleaned up  unnecessary code, and organized everything.
-
-**Removed**
-
-* `smiter` because it was kind of pointless.
+* Moved the package directory to `./src`, as recommended by best practices. (shrug)
+* Removed entire sections of code that either aren't useful or do not belong. Some of them deserve to be their own packages. 
 
 0.2.0 (2021/1/8)
 -----------------

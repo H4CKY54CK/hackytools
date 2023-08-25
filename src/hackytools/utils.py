@@ -6,8 +6,6 @@ import itertools
 import numpy as np
 import collections
 
-from . import iterators
-
 
 
 def combutations(iterable, n, *, reverse=False):
@@ -84,18 +82,18 @@ def frate(n_bytes: int, seconds: int | float, *, precision: int = 2, base: int =
     :param seconds: The elapsed time in seconds.
     :param precision: The desired float precision of the resulting amount.
     :param base: Which base system to use.
-        base 10 (or 1000) uses 1000 bytes for KB, etc.
+        base 10 (or 1_000) uses 1_000 bytes for KB, etc.
         base 2 (or 1024) uses 1024 bytes as KiB, etc.
         (Default: 10)"""
 
-    if base in (10, 1000):
+    if base in (10, 1_000):
         units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
-        k = 1000
+        k = 1_000
     elif base in (2, 1024):
         units = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"]
         k = 1024
     else:
-        raise ValueError("please choose between base 2 (aka 1024) and base 10 (aka 1000)")
+        raise ValueError("please choose between base 2 (aka 1024) and base 10 (aka 1_000)")
 
     for i in range(len(units)):
         if n_bytes < (k ** (i + 1)):
@@ -108,13 +106,13 @@ def fsize(amount: int, *, base: int = 10, precision: int = 2) -> str:
     """Convert a file size into a human-readable format.
 
     :param amount:      The amount of bytes to convert.
-    :param base:        Which base system to use. Valid values are: `10` or `1000` for KB, MB, GB, TB, etc. and `2` or
+    :param base:        Which base system to use. Valid values are: `10` or `1_000` for KB, MB, GB, TB, etc. and `2` or
                         `1024` for KiB, MiB, GiB, TiB, etc. (Default: 10).
     :param precision:   The desired float precision of the resulting amount.
     """
-    if base in (10, 1000):
+    if base in (10, 1_000):
         units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
-        k = 1000
+        k = 1_000
     elif base in (2, 1024):
         units = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"]
         k = 1024
@@ -128,21 +126,39 @@ def fsize(amount: int, *, base: int = 10, precision: int = 2) -> str:
     return "%s %s" % (round(amount, precision), u)
 
 
-def ftime(seconds: float, *args, **kwargs) -> str:
-    """Converts seconds to nanoseconds and then acts as an alias to ftime_ns."""
-    return ftime_ns(seconds * 1000000000, spaced=spaced)
+# These next two functions are basically indentical, but for performance reasons they need to be explicitly defined.
+def ftime(seconds: int, *, precision: int = 2, spaced: bool = True) -> str:
+    """A formatting function for seconds. Customize the output with the keyword-only parameters.
 
-
-# Marked for a review. Possibly belongs in a `hackytools.formatting` submodule?
-def ftime_ns(nanoseconds: int, *, precision: int = 2, spaced: bool = True) -> str:
+    :param seconds:     The amount of seconds to convert to a human-readable format.
+    :param precision:   The floating point precision to use for the output. (Default: 2)
+    :param spaced:      Whether to insert a space between the number and the unit. (Default: True)
+    """
     space = " " if spaced else ""
-    if nanoseconds < 1000:
+    if nanoseconds < 1_000:
         return "%s%sns" % (format(nanoseconds, ".%df" % precision), space)
-    if nanoseconds < 1000000:
-        return "%s%s\u00b5s" % (format(nanoseconds / 1000, ".%df" % precision), space)
-    if nanoseconds < 1000000000:
-        return "%s%sms" % (format(nanoseconds / 1000000, ".%df" % precision), space)
-    return "%s%ss" % (format(nanoseconds / 1000000000, ".%df" % precision), space)
+    if nanoseconds < 1_000_000:
+        return "%s%s\u00b5s" % (format(nanoseconds / 1_000, ".%df" % precision), space)
+    if nanoseconds < 1_000_000_000:
+        return "%s%sms" % (format(nanoseconds / 1_000_000, ".%df" % precision), space)
+    return "%s%ss" % (format(nanoseconds / 1_000_000_000, ".%df" % precision), space)
+
+
+def ftime_ns(nanoseconds: int, *, precision: int = 2, spaced: bool = True) -> str:
+    """A formatting function for nanoseconds. Customize the output with the keyword-only parameters.
+
+    :param nanoseconds:     The amount of nanoseconds to convert to a human-readable format.
+    :param precision:   The floating point precision to use for the output. (Default: 2)
+    :param spaced:      Whether to insert a space between the number and the unit. (Default: True)
+    """
+    space = " " if spaced else ""
+    if nanoseconds < 1_000:
+        return "%s%sns" % (format(nanoseconds, ".%df" % precision), space)
+    if nanoseconds < 1_000_000:
+        return "%s%s\u00b5s" % (format(nanoseconds / 1_000, ".%df" % precision), space)
+    if nanoseconds < 1_000_000_000:
+        return "%s%sms" % (format(nanoseconds / 1_000_000, ".%df" % precision), space)
+    return "%s%ss" % (format(nanoseconds / 1_000_000_000, ".%df" % precision), space)
 
 
 def groups(iterable, size, *, fill=False, fill_value=None):
@@ -205,7 +221,6 @@ def magnitude(number: int) -> int:
     return math.floor(math.log10(number)) + 1
 
 
-# Marked for a review. Possibly belongs in a `hackytools.formatting` submodule?
 def mktable(data, *, separator=" ", alignment="<", prefix="", suffix="", strip=False):
     """Generate tables from 2-D arrays. Row prefixes and suffixes are customizable, as are the per-column-alignments,
     the column separator, and whether to strip the trailing whitespace. The per-column-alignments can be passed as a
@@ -253,7 +268,7 @@ def odd1out(data):
 
     :param data:    The list/tuple/set to "separate" into tuples of `(one_item, rest_of_items)`.
     """
-    return tuple(iterators.odd1out(data))
+    return tuple((m, tuple(i for i in data if i is not m)) for m in data)
 
 
 def powround(num, base=math.e):
@@ -313,6 +328,14 @@ def randmag(size):
 
 # Do we need a `hackytools.formatting` submodule? Genuinely, do we?
 def rem_time(seconds, *, abbrev=False, spaced=True, separator=", "):
+    """A formatting function for converting large numbers of seconds into the appropriate seconds, minutes, hours, days,
+    weeks, and years. Customize the output with the keyword-only arguments.
+
+    :param seconds:     The amount of seconds to convert.
+    :param abbrev:      Whether to abbreviate the units. (Default: False)
+    :param spaced:      Whether to insert a space between the value and the unit. (Default: True)
+    :param separator:   The separator to use. (Default: ',')
+    """
     data = []
     space = " " if spaced else ""
     values = (60, 60, 24, 7, 52, math.inf)
