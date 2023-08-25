@@ -128,3 +128,4 @@ dmypy.json
 hackytools/__pycache__/
 .gitignore
 Makefile
+.pytest_cache/
