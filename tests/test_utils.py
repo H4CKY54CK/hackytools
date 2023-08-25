@@ -1,12 +1,13 @@
-from hackytools.utils import *
+from src.hackytools.utils import *
 
 
 def test_combutations():
     data = 'ABC'
-    assert list(combutations(data)) == [('A',), ('B',), ('C',), ('A', 'B'), ('A', 'C'), ('B', 'C'), ('A', 'B', 'C')]
-    assert list(combutations(data, 2)) == [('A',), ('B',), ('C',), ('A', 'B'), ('A', 'C'), ('B', 'C')]
-    assert list(combutations(data, reverse=True)) == [('A', 'B', 'C'), ('A', 'B'), ('A', 'C'), ('B', 'C'), ('A',), ('B',), ('C',)]
-    assert list(combutations(data, 2, reverse=True)) == [('A', 'B'), ('A', 'C'), ('B', 'C'), ('A',), ('B',), ('C',)]
+    expected = tuple((('A',), ('B',), ('C',), ('A', 'B'), ('A', 'C'), ('B', 'C'), ('A', 'B', 'C')))
+    assert combutations(data) == expected
+    assert combutations(data, 2) == tuple(i for i in expected if len(i) <= 2)
+    assert combutations(data, reverse=True) == expected[::-1]
+    assert combutations(data, 2, reverse=True) == tuple(i for i in expected[::-1] if len(i) <= 2)
 
 
 def test_flatten():
@@ -16,15 +17,20 @@ def test_flatten():
 
 def test_ftime():
     data = (
-        (68546438444, '1m', '8s'),
-        (979779441123, '16m', '19s'),
-        (7977941341123, '2h, 12m', '57s'),
-        (97977941341123, '1d, 3h, 12m', '57s'),
+        (0, '0', 'ns'),
+        (10, '10', 'ns'),
+        (371, '371', 'ns'),
+        (5150, '5', '\u00b5s'),
+        (58715, '58', '\u00b5s'),
+        (987465, '987', '\u00b5s'),
+        (3167431, '3', 'ms'),
+        (64744741, '64', 'ms'),
+        (943167497, '943', 'ms'),
+        (6468541351, '6', 's'),
     )
 
     for n, pre, after in data:
-        n /= 1000000000
-        res = ftime(n, keep_seconds=True)
+        res = ftime(n / 1_000_000_000)
         assert res.startswith(pre), "Expected: %s | Got: %s" % (pre + ' ' + after, res)
         assert res.endswith(after), "Expected: %s | Got: %s" % (pre + ' ' + after, res)
 
@@ -79,7 +85,7 @@ def test_rem_time():
     )
 
     for n, pre, after in data:
-        res = rem_time(n / 1000000000, abbreviate=True)
+        res = rem_time(n / 1000000000, abbrev=True)
         assert res.startswith(pre), "Expected: %s | Got: %s" % (pre + ' ' + after, res)
         assert res.endswith(after), "Expected: %s | Got: %s" % (pre + ' ' + after, res)
 

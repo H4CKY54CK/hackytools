@@ -1,52 +1,43 @@
 import os
 import math
+import array
 import hashlib
 import random
 import itertools
 import numpy as np
 import collections
+from typing import Optional
 
 
-
-def combutations(iterable, n, *, reverse=False):
+def combutations(iterable, n=None, *, reverse=False):
     """Gives you every combination of 'iterable' for every length up to (and including) 'n'.
 
     For example, list(combutations("abc")) would give you:
     [('a',), ('b',), ('c',), ('a', 'b'), ('a', 'c'), ('b', 'c'), ('a', 'b', 'c')]
 
     :param iterable: Iterable to use for making combutations out of.
-    :param n: The max length of combinations.
+    :param n: The max length of combinations. (Default: None)
     """
-    if not reverse:
-        yield from (item for i in range(1, (n or len(iterable)) + 1, 1) for item in itertools.combinations(iterable, i))
-    else:
-        yield from (item for i in range(n or len(iterable), 0, -1) for item in itertools.combinations(iterable, i))
+    result = tuple(item for i in range(1, (n or len(iterable)) + 1, 1) for item in itertools.combinations(iterable, i))
+    if reverse:
+        return result[::-1]
+    return result
 
 
-# Marked for removal.
-# On second thought. hashlib only provides this in 3.11+. We provide this for any Python?
-def file_digest(filename, *, algorithm="sha1", buffer=2**20):
+def file_digest(fd, algo="sha1", *, buffer=2**20):
+    """Now works identically to 'hashlib.file_digest', but is available on any Python version. Hooray.
+
+    :param fd:      The file-like object to compute the hexdigest of. Must be in binary reading mode.
+    :param algo:    The algorithm used to compute the hash. Can also be a function. (Default: "sha1")
+    :param buffer:  The max amount of bytes to read from the given file at once. (Default: 2**20)
     """
-    A memory efficient function for computing the hexdigest of a given file. The algorithm used and the size of the
-    buffer used for reading from the file can both be changed by using the corresponding keyword arguments.
-
-    Note: Hashlib recently added a similar function to their module. The problem is that it is only available if you
-    have that version of Python or higher. My library doesn't care what version you have.
-
-    :param algorithm: The algorithm used to compute the hash. Can also be a function. (Default: "sha1")
-    :param buffer: The max amount of bytes to read from the given file at once. (Default: 2**20)
-    """
-    if callable(algorithm):
-        m = algorithm()
-    else:
-        m = hashlib.new(algorithm)
-    with open(filename, "rb") as f:
-        while True:
-            block = f.read(buffer)
-            if not block:
-                break
-            m.update(block)
-    return m.hexdigest()
+    m = algo() if callable(algo) else hashlib.new(algo)
+    while True:
+        block = fd.read(buffer)
+        if not block:
+            break
+        m.update(block)
+    return m
 
 
 # def find(source):
@@ -64,7 +55,10 @@ def file_digest(filename, *, algorithm="sha1", buffer=2**20):
 
 
 def flatten(data):
-    """Flatten a list/tuple/set of any nestedness."""
+    """Flatten a list/tuple/set of any nestedness.
+
+    :param data:    The list/tuple/set to flatten.
+    """
     result = []
     for item in data:
         if isinstance(item, (tuple, list, set)):
@@ -78,13 +72,14 @@ def frate(n_bytes: int, seconds: int | float, *, precision: int = 2, base: int =
     """Calculate a given amount of bytes 'n_bytes' transferred over elapsed time 'seconds' and
     return the result in a human-readable format.
 
-    :param n_bytes: The amount of bytes transferred.
-    :param seconds: The elapsed time in seconds.
-    :param precision: The desired float precision of the resulting amount.
-    :param base: Which base system to use.
-        base 10 (or 1_000) uses 1_000 bytes for KB, etc.
-        base 2 (or 1024) uses 1024 bytes as KiB, etc.
-        (Default: 10)"""
+    :param n_bytes:     The amount of bytes transferred.
+    :param seconds:     The elapsed time in seconds.
+    :param precision:   The desired float precision of the resulting amount.
+    :param base:        Which base system to use.
+                        base 10 (or 1_000) uses 1_000 bytes for KB, etc.
+                        base 2 (or 1024) uses 1024 bytes as KiB, etc.
+                        (Default: 10)
+    """
 
     if base in (10, 1_000):
         units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
@@ -127,13 +122,14 @@ def fsize(amount: int, *, base: int = 10, precision: int = 2) -> str:
 
 
 # These next two functions are basically indentical, but for performance reasons they need to be explicitly defined.
-def ftime(seconds: int, *, precision: int = 2, spaced: bool = True) -> str:
+def ftime(seconds: float, *, precision: int = 2, spaced: bool = True) -> str:
     """A formatting function for seconds. Customize the output with the keyword-only parameters.
 
     :param seconds:     The amount of seconds to convert to a human-readable format.
     :param precision:   The floating point precision to use for the output. (Default: 2)
     :param spaced:      Whether to insert a space between the number and the unit. (Default: True)
     """
+    nanoseconds = seconds * 1_000_000_000
     space = " " if spaced else ""
     if nanoseconds < 1_000:
         return "%s%sns" % (format(nanoseconds, ".%df" % precision), space)
@@ -161,7 +157,7 @@ def ftime_ns(nanoseconds: int, *, precision: int = 2, spaced: bool = True) -> st
     return "%s%ss" % (format(nanoseconds / 1_000_000_000, ".%df" % precision), space)
 
 
-def groups(iterable, size, *, fill=False, fill_value=None):
+def groups(iterable, size: int = 2, *, fill: bool = False, fill_value: Optional = None):
     """
     Takes a sequence/collection (whichever is technically correct) 'iterable' and returns them in groups of 'size'.
 
@@ -170,7 +166,12 @@ def groups(iterable, size, *, fill=False, fill_value=None):
         print(groups('abcdefghijklmnopqrstuvwxyz', 3))
         # [('a', 'b', 'c'), ('d', 'e', 'f'), ..., ('v', 'w', 'x'), ('y', 'z')]
 
-    For the iterator/generator equivalent, use 'hackytools.iterators.groups'
+    Note: For the iterator/generator equivalent, use 'hackytools.iterators.groups'.
+
+    :param iterable:    The iterable to group into separate, smaller groups.
+    :param size:        How many elements the smaller groups should contain. (Default: 2)
+    :param fill:        Whether to pad the last group to 'size', should it need it. (Default: False)
+    :param fill_value:  The value to pad the last group with. (Default: None)
     """
     total = math.ceil(len(iterable) / size)
     new = [tuple(iterable[i*size:i*size+size]) for i in range(total)]
@@ -197,26 +198,26 @@ def is_prime(number: int) -> bool:
     return True
 
 
-# Marked for review & possible relocation into `hackytools.iterators`
-def iterdir(source):
-    """Traverse a directory and its subdirectories, yielding all the same files
-    and/or directories that os.walk would have. Uses recursion."""
-    try:
-        for item in os.scandir(source):
-            if item.is_dir():
-                if not item.is_symlink():
-                    yield from iterdir(item)
-            else:
-                yield item.path
-    except PermissionError:
-        pass
+# # Marked for review & possible relocation into `hackytools.iterators`
+# def iterdir(source):
+#     """Traverse a directory and its subdirectories, yielding all the same files
+#     and/or directories that os.walk would have. Uses recursion."""
+#     try:
+#         for item in os.scandir(source):
+#             if item.is_dir():
+#                 if not item.is_symlink():
+#                     yield from iterdir(item)
+#             else:
+#                 yield item.path
+#     except PermissionError:
+#         pass
 
 
 # Marked for review. Consider renaming? And consider `hackytools.math` submodule?
 def magnitude(number: int) -> int:
     """Return the magnitude of a given number. For instance, 993 has a magnitude of 4, while 7 has a magnitude of 2.
 
-    :param number:   The number the generate the magnitude of.
+    :param number:  The number to get the magnitude of.
     """
     return math.floor(math.log10(number)) + 1
 
@@ -244,7 +245,7 @@ def mktable(data, *, separator=" ", alignment="<", prefix="", suffix="", strip=F
 
 
 # Possibly deserves to be in a `hackytools.math` submodule?
-def n_primes(amount):
+def n_primes(amount: int) -> array.array:
     """Return the first `amount` amount of primes.
 
     Uses the highly-optimized `hackytools.utils.primes_to` and a clever estimate for an upper-bound, then slices out the
@@ -271,7 +272,7 @@ def odd1out(data):
     return tuple((m, tuple(i for i in data if i is not m)) for m in data)
 
 
-def powround(num, base=math.e):
+def powround(num: int | float, base: int | float = math.e) -> int | float:
     """A rounding mechanism that mimicks math.log. Returns whichever power of 'base' is closest to 'num'.
 
     :param base:    The base to use. For log2, use 2. For log10, use 10. (Default: math.e)
@@ -281,23 +282,32 @@ def powround(num, base=math.e):
     return lo if hi - num > num - lo else hi
 
 
-def powround1p(num):
-    """A rounding mechanism that mimicks math.log1p. Returns whichever power of math.e is closest to 'num' + 1."""
+def powround1p(num: int | float) -> int | float:
+    """A rounding mechanism that mimicks math.log1p. Returns whichever power of math.e is closest to 'num' + 1.
+
+    :param limit:   Only generate primes up to, but not including, this number.
+    """
     return powround(num + 1, base=math.e)
 
 
-def powround10(num):
-    """A rounding mechanism that mimicks math.log10. Returns whichever power of 10 is closest to 'num'."""
+def powround10(num: int | float) -> int | float:
+    """A rounding mechanism that mimicks math.log10. Returns whichever power of 10 is closest to 'num'.
+
+    :param limit:   Only generate primes up to, but not including, this number.
+    """
     return powround(num, base=10)
 
 
-def powround2(num):
-    """A rounding mechanism that mimicks math.log2. Returns whichever power of 2 is closest to 'num'."""
+def powround2(num: int | float) -> int | float:
+    """A rounding mechanism that mimicks math.log2. Returns whichever power of 2 is closest to 'num'.
+
+    :param limit:   Only generate primes up to, but not including, this number.
+    """
     return powround(num, base=2)
 
 
 # Possibly deserves to be in a `hackytools.math` submodule?
-def primes_to(limit):
+def primes_to(limit: int) -> array.array:
     """Return a numpy array of all the primes under `limit`. This function is very optimized for speed. It takes
     advantage of the SIMD-nature of array operation in `numpy`.
 
@@ -327,7 +337,7 @@ def randmag(size):
 
 
 # Do we need a `hackytools.formatting` submodule? Genuinely, do we?
-def rem_time(seconds, *, abbrev=False, spaced=True, separator=", "):
+def rem_time(seconds, *, abbrev=False, spaced=False, separator=", "):
     """A formatting function for converting large numbers of seconds into the appropriate seconds, minutes, hours, days,
     weeks, and years. Customize the output with the keyword-only arguments.
 
@@ -347,12 +357,12 @@ def rem_time(seconds, *, abbrev=False, spaced=True, separator=", "):
             if remainder > 0:
                 if not abbrev and remainder > 1:
                     unit += "s"
-                data.append("%s%s%s" % (remainder, space, unit))
+                data.append("%s%s%s" % (int(remainder), space, unit))
         else:
             if quotient > 0:
                 if not abbrev and quotient > 1:
                     unit += "s"
-                data.append("%s%s%s" % (quotient, space, unit))
+                data.append("%s%s%s" % (int(quotient), space, unit))
                 break
     return separator.join(reversed(data))
 
@@ -370,24 +380,24 @@ def splitint(number):
     return d[::-1]
 
 
-# Marked for review. Need confirmation that this works the same way as `os.walk`.
-def walk(source):
-    """A slightly leaner, but more careless, `os.walk` with the same tuple return format."""
-    root = source
-    files = []
-    dirs = []
-    try:
-        for item in os.scandir(source):
-            if item.is_dir():
-                if not item.is_symlink():
-                    dirs.append(item.name)
-            else:
-                files.append(item.name)
-    except PermissionError:
-        pass
-    except OSError:
-        pass
+# # Marked for review. Need confirmation that this works the same way as `os.walk`.
+# def walk(source):
+#     """A slightly leaner, but more careless, `os.walk` with the same tuple return format."""
+#     root = source
+#     files = []
+#     dirs = []
+#     try:
+#         for item in os.scandir(source):
+#             if item.is_dir():
+#                 if not item.is_symlink():
+#                     dirs.append(item.name)
+#             else:
+#                 files.append(item.name)
+#     except PermissionError:
+#         pass
+#     except OSError:
+#         pass
 
-    yield (root, dirs, files)
-    for sub in dirs:
-        yield from walk(os.path.join(root, sub))
+#     yield (root, dirs, files)
+#     for sub in dirs:
+#         yield from walk(os.path.join(root, sub))
