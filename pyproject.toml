@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,7 +7,8 @@ name = "hackytools"
 dependencies = ["numpy"]
 dynamic = ["version"]
 authors = [
-  { name="Hackysack", email="tk13xr37@gmail.com" },
+  { name="Hackysack", email="h4cky54ck@gmail.com" },
+  # { name="Hackysack", email="tk13xr37@gmail.com" },
 ]
 description = "Various tools and utilities that are hacky in nature. And convenient, hopefully."
 readme = "README.md"
@@ -18,10 +19,15 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[tool.setuptools.packages.find]
+where = ["src"]  # list of folders that contain the packages (["."] by default)
+include = ["hackytools"]  # package names should match these glob patterns (["*"] by default)
+exclude = ["experimental"]  # exclude packages matching these glob patterns (empty by default)
+namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
+
 [tool.setuptools.dynamic]
 version = {attr = "hackytools.__version__"}
 
 [project.urls]
 "Homepage" = "https://github.com/h4cky54ck/hackytools"
 "Bug Tracker" = "https://github.com/h4cky54ck/hackytools/issues"
-
