@@ -68,11 +68,11 @@ def flatten(data):
     return result
 
 
-def frate(n_bytes: int, seconds: int | float, *, precision: int = 2, base: int = 2) -> str:
-    """Calculate a given amount of bytes 'n_bytes' transferred over elapsed time 'seconds' and
+def frate(nbytes: int, seconds: int | float, *, precision: int = 2, base: int = 1024) -> str:
+    """Calculate a given amount of bytes 'nbytes' transferred over elapsed time 'seconds' and
     return the result in a human-readable format.
 
-    :param n_bytes:     The amount of bytes transferred.
+    :param nbytes:     The amount of bytes transferred.
     :param seconds:     The elapsed time in seconds.
     :param precision:   The desired float precision of the resulting amount.
     :param base:        Which base system to use.
@@ -80,45 +80,33 @@ def frate(n_bytes: int, seconds: int | float, *, precision: int = 2, base: int =
                         base 2 (or 1024) uses 1024 bytes as KiB, etc.
                         (Default: 10)
     """
+    return "%s/s" % (fsize(nbytes / seconds),)
 
-    if base in (10, 1_000):
-        units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
-        k = 1_000
-    elif base in (2, 1024):
-        units = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"]
-        k = 1024
+
+
+def fsize(n: int, *, base: int = 1024, precision: int = 2):
+    """Convert a file size into a human-readable format.
+
+    :param nbytes:      The amount of bytes to convert.
+    :param power:       Which base of power to use for the units. Valid values are:
+                        2 or 1024 (Default): B, KiB, MiB, GiB, TiB, PiB, EiB, ZiB, YiB
+                        10 or 1000: B, KB, MB, GB, TB, PB, EB, ZB, YB
+    :param precision:   The desired precision of the resulting float. (Default: 2)
+    """
+    if base in (2,1024):
+        base = 1024
+        units = ("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB")
+    elif base in (10,1000):
+        base = 1000
+        units = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
     else:
         raise ValueError("please choose between base 2 (aka 1024) and base 10 (aka 1_000)")
 
-    for i in range(len(units)):
-        if n_bytes < (k ** (i + 1)):
-            output = f"{(n_bytes / (k ** i)) / seconds:.{precision}f} {units[i]}/s"
-            return output
-    raise ValueError("exceeds maximum unit size")
-
-
-def fsize(amount: int, *, base: int = 10, precision: int = 2) -> str:
-    """Convert a file size into a human-readable format.
-
-    :param amount:      The amount of bytes to convert.
-    :param base:        Which base system to use. Valid values are: `10` or `1_000` for KB, MB, GB, TB, etc. and `2` or
-                        `1024` for KiB, MiB, GiB, TiB, etc. (Default: 10).
-    :param precision:   The desired float precision of the resulting amount.
-    """
-    if base in (10, 1_000):
-        units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
-        k = 1_000
-    elif base in (2, 1024):
-        units = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"]
-        k = 1024
-    else:
-        raise ValueError("please choose between base 2 (aka 1024) and base 10")
-    for u in units:
-        if amount < k:
+    for unit in units:
+        if n < base:
             break
-        amount /= k
-
-    return "%s %s" % (round(amount, precision), u)
+        n /= base
+    return "%%.%df %s" % (precision, unit) % (n,)
 
 
 # These next two functions are basically indentical, but for performance reasons they need to be explicitly defined.
