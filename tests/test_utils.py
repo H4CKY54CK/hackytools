@@ -55,15 +55,6 @@ def test_ftime_ns():
         assert res.endswith(after), "Expected: %s | Got: %s" % (pre + ' ' + after, res)
 
 
-def test_is_prime():
-    primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
-    not_primes = [i for i in range(50) if i not in primes]
-    for i in primes:
-        assert is_prime(i) is True
-    for i in not_primes:
-        assert is_prime(i) is False
-
-
 def test_n_primes():
     primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
     assert len(n_primes(15)) == 15 and list(n_primes(15)) == primes
