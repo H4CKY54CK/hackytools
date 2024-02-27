@@ -7,10 +7,9 @@ You can install this package via the command:
 `pip install https://github.com/H4CKY54CK/hackytools/archive/master.zip`
 
 # What do I get?
-Quite a bit, actually. There's a decorator for measuring function runtime, pretty formatting/conversions for units of time, units of size, and the rate of size over time... Take a look at the documentation to see what we offer!
+Quite a bit, actually. There's a decorator for measuring function runtime, pretty formatting/conversions for units of time, units of size, and the rate of size over time... Take a look at the documentation to see what we offer! You know, as soon as I write it up. Sorry! In the meantime, you can have a look at the source code, which is very heavily documented via docstrings!
 
 # Decorators
-
 ## `@perf`
 
 ```
