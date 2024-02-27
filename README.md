@@ -4,7 +4,7 @@ Hacky Tools, by Hackysack (I'll never get tired of that joke.)
 # Installation
 You can install this package via the command:
 
-`pip install hackytools`
+`pip install https://github.com/H4CKY54CK/hackytools/archive/master.zip`
 
 # What do I get?
 Quite a bit, actually. There's a decorator for measuring function runtime, pretty formatting/conversions for units of time, units of size, and the rate of size over time... Take a look at the documentation to see what we offer!
