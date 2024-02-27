@@ -170,22 +170,6 @@ def groups(iterable, size: int = 2, *, fill: bool = False, fill_value: Optional 
     return new
 
 
-# Marked for review & possible removal?
-def is_prime(number: int) -> bool:
-    """Check if a number is prime or not. This is probably inefficient.
-
-    :param number:  The number whose primality to check.
-    """
-    if number == 2:
-        return True
-    elif number < 2 or number % 2 == 0:
-        return False
-    for i in range(3, int(number ** .5) + 1, 2):
-        if number % i == 0:
-            return False
-    return True
-
-
 # # Marked for review & possible relocation into `hackytools.iterators`
 # def iterdir(source):
 #     """Traverse a directory and its subdirectories, yielding all the same files
