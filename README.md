@@ -11,35 +11,7 @@ Quite a bit, actually. There's a decorator for measuring function runtime, prett
 
 # Decorators
 
-## `@elapsed` / `@bestof`
-
-Two decorators made for quickly timing a function. `@elapsed` only times the function once, and `@bestof` defaults to best of 7, but you can specify any number. Here's an example of how to use them.
-
-```
-from hackytools import elapsed, bestof
-import time
-
-@elapsed
-def fun1():
-    time.sleep(.5)
-    return
-
-@bestof
-def fun2():
-    time.sleep(.25)
-    return
-
-fun1()
-fun2()
-
-# Output
-# 'fun1' elapsed: 500.53 ms
-# 'fun2' elapsed (best of 7): avg: 250.35 ms | best: 250.28 ms | worst: 250.63 ms
-```
-
-The timing decorator also automatically converts the time returned into a sensible unit, for optimal viewing pleasure.
-
-**And recently, a new decorator called `perf`, which lets you specify the amount of rounds, the amount of loops per round, and even a custom string to use in place of the function name!**
+## `@perf`
 
 ```
 from hackytools.timing import perf
